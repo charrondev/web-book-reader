@@ -1,0 +1,458 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2E1EC74F3735C0990D8A8D88 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8165245877FD134FB8F92A3 /* WebKit.framework */; };
+		46B3E5071E2C942C0E0A6F10 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1958FCBB74DCD581D9EA142 /* MetalKit.framework */; };
+		595BBABC892AE7EC4DE6D88D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0D2C450E68826C47F514CFC /* QuartzCore.framework */; };
+		5C0D1C288F700BA0985B5F03 /* libweb_book_reader_lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93B22A9302CAB0E6D48C28E3 /* libweb_book_reader_lib.a */; };
+		6A516D875778286F7BDEE186 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2AF306273C161B31EF492D9 /* Assets.xcassets */; };
+		6C3EFC9D9311ED8388643D02 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 377E8F38620956DD55704B1C /* CoreGraphics.framework */; };
+		92A77E1E484F349170D677BC /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEF3F294BC69B57E59135BD7 /* main.mm */; };
+		B967F930C3A7AC8685FCFD83 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 143E3D7B1B3136BD19923E9B /* UIKit.framework */; };
+		E09C57C819FD2360C2C3F2DA /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 399E3E4701B4D15E68A5D0AB /* Metal.framework */; };
+		F1147C3884D8C90353BAEFE5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D50A8A42F6A7D1073C04000 /* Security.framework */; };
+		F9526238930394DCA0C35023 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = E7A03724ED0D07F6DBE15AE7 /* assets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		10C7FF0DA99797BE5F0E5C61 /* lib.rs */ = {isa = PBXFileReference; path = lib.rs; sourceTree = "<group>"; };
+		143E3D7B1B3136BD19923E9B /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		377E8F38620956DD55704B1C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		399E3E4701B4D15E68A5D0AB /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		3E0B7DC86E0624E48C399820 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		418CF6FA3E5B3E6AB46F589A /* web-book-reader_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "web-book-reader_iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5D810A6396C85AD2AAC2C5F3 /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
+		7D50A8A42F6A7D1073C04000 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		93B22A9302CAB0E6D48C28E3 /* libweb_book_reader_lib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libweb_book_reader_lib.a; sourceTree = "<group>"; };
+		B0D2C450E68826C47F514CFC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		BC6E9DCFDEFA3EF43202AAC4 /* web-book-reader_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "web-book-reader_iOS.entitlements"; sourceTree = "<group>"; };
+		CEF3F294BC69B57E59135BD7 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		D1958FCBB74DCD581D9EA142 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		D2E539E12E19565C4F17F18F /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
+		D8165245877FD134FB8F92A3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		E2AF306273C161B31EF492D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E7A03724ED0D07F6DBE15AE7 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6AAFF4AE55473144FBA064B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C0D1C288F700BA0985B5F03 /* libweb_book_reader_lib.a in Frameworks */,
+				6C3EFC9D9311ED8388643D02 /* CoreGraphics.framework in Frameworks */,
+				E09C57C819FD2360C2C3F2DA /* Metal.framework in Frameworks */,
+				46B3E5071E2C942C0E0A6F10 /* MetalKit.framework in Frameworks */,
+				595BBABC892AE7EC4DE6D88D /* QuartzCore.framework in Frameworks */,
+				F1147C3884D8C90353BAEFE5 /* Security.framework in Frameworks */,
+				B967F930C3A7AC8685FCFD83 /* UIKit.framework in Frameworks */,
+				2E1EC74F3735C0990D8A8D88 /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		05785404F045D3AEB157298E /* web-book-reader */ = {
+			isa = PBXGroup;
+			children = (
+				CEF3F294BC69B57E59135BD7 /* main.mm */,
+				CEEF23863A86A927DBD066A2 /* bindings */,
+			);
+			path = "web-book-reader";
+			sourceTree = "<group>";
+		};
+		196A18B6E36B4BDA1DE20737 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				10C7FF0DA99797BE5F0E5C61 /* lib.rs */,
+				5D810A6396C85AD2AAC2C5F3 /* main.rs */,
+			);
+			name = src;
+			path = ../../src;
+			sourceTree = "<group>";
+		};
+		28CDE063A24F77A643F8A39E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				418CF6FA3E5B3E6AB46F589A /* web-book-reader_iOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97B6A2891E5FB27F2E43C152 /* web-book-reader_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				3E0B7DC86E0624E48C399820 /* Info.plist */,
+				BC6E9DCFDEFA3EF43202AAC4 /* web-book-reader_iOS.entitlements */,
+			);
+			path = "web-book-reader_iOS";
+			sourceTree = "<group>";
+		};
+		97D39223F52CE2F549F464AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				377E8F38620956DD55704B1C /* CoreGraphics.framework */,
+				93B22A9302CAB0E6D48C28E3 /* libweb_book_reader_lib.a */,
+				399E3E4701B4D15E68A5D0AB /* Metal.framework */,
+				D1958FCBB74DCD581D9EA142 /* MetalKit.framework */,
+				B0D2C450E68826C47F514CFC /* QuartzCore.framework */,
+				7D50A8A42F6A7D1073C04000 /* Security.framework */,
+				143E3D7B1B3136BD19923E9B /* UIKit.framework */,
+				D8165245877FD134FB8F92A3 /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A396DC0CDE468E76AEF0624F /* Externals */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Externals;
+			sourceTree = "<group>";
+		};
+		C202398F1059EF09880DC2B0 = {
+			isa = PBXGroup;
+			children = (
+				E7A03724ED0D07F6DBE15AE7 /* assets */,
+				E2AF306273C161B31EF492D9 /* Assets.xcassets */,
+				A396DC0CDE468E76AEF0624F /* Externals */,
+				D457C9A1883B6109CADDA24A /* Sources */,
+				196A18B6E36B4BDA1DE20737 /* src */,
+				97B6A2891E5FB27F2E43C152 /* web-book-reader_iOS */,
+				97D39223F52CE2F549F464AD /* Frameworks */,
+				28CDE063A24F77A643F8A39E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CEEF23863A86A927DBD066A2 /* bindings */ = {
+			isa = PBXGroup;
+			children = (
+				D2E539E12E19565C4F17F18F /* bindings.h */,
+			);
+			path = bindings;
+			sourceTree = "<group>";
+		};
+		D457C9A1883B6109CADDA24A /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				05785404F045D3AEB157298E /* web-book-reader */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B7BDD6AC980E9747240757D7 /* web-book-reader_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 35EE5A854EF09AD81AAC6395 /* Build configuration list for PBXNativeTarget "web-book-reader_iOS" */;
+			buildPhases = (
+				EFD7D97150109C584EBB835F /* Build Rust Code */,
+				2EA64B0CB1B832F98A8CC31D /* Sources */,
+				B40D01E4F566F1885F72AAFA /* Resources */,
+				6AAFF4AE55473144FBA064B9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "web-book-reader_iOS";
+			productName = "web-book-reader_iOS";
+			productReference = 418CF6FA3E5B3E6AB46F589A /* web-book-reader_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F32E3400C518AB2C8B501E08 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 1AD2E75ABB2496E5092086CF /* Build configuration list for PBXProject "web-book-reader" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = C202398F1059EF09880DC2B0;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B7BDD6AC980E9747240757D7 /* web-book-reader_iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B40D01E4F566F1885F72AAFA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A516D875778286F7BDEE186 /* Assets.xcassets in Resources */,
+				F9526238930394DCA0C35023 /* assets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		EFD7D97150109C584EBB835F /* Build Rust Code */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Rust Code";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/target/aarch64-apple-ios/${CONFIGURATION}/deps/libweb_book_reader_lib.a",
+				"$(SRCROOT)/target/x86_64-apple-ios/${CONFIGURATION}/deps/libweb_book_reader_lib.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "bun tauri ios xcode-script -v --platform ${PLATFORM_DISPLAY_NAME:?} --sdk-root ${SDKROOT:?} --framework-search-paths \"${FRAMEWORK_SEARCH_PATHS:?}\" --header-search-paths \"${HEADER_SEARCH_PATHS:?}\" --gcc-preprocessor-definitions \"${GCC_PREPROCESSOR_DEFINITIONS:-}\" --configuration ${CONFIGURATION:?} ${FORCE_COLOR} ${ARCHS:?}";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2EA64B0CB1B832F98A8CC31D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				92A77E1E484F349170D677BC /* main.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0E075527DFC5BD28DD21DAA0 /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = release;
+		};
+		437D4AFDFC5AB604EA13E2CC /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+					"arm64-sim",
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "web-book-reader_iOS/web-book-reader_iOS.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = "arm64-sim x86_64";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = "web-book-reader_iOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64-sim]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64-sim/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tauri.web-book-reader";
+				PRODUCT_NAME = "web-book-reader";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64  arm64-sim";
+			};
+			name = release;
+		};
+		749612CE6E3EB7AD7DBBAC01 /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = debug;
+		};
+		E361D712DEA3902F2668C963 /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+					"arm64-sim",
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "web-book-reader_iOS/web-book-reader_iOS.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = "arm64-sim x86_64";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = "web-book-reader_iOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64-sim]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64-sim/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tauri.web-book-reader";
+				PRODUCT_NAME = "web-book-reader";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64  arm64-sim";
+			};
+			name = debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1AD2E75ABB2496E5092086CF /* Build configuration list for PBXProject "web-book-reader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				749612CE6E3EB7AD7DBBAC01 /* debug */,
+				0E075527DFC5BD28DD21DAA0 /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+		35EE5A854EF09AD81AAC6395 /* Build configuration list for PBXNativeTarget "web-book-reader_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E361D712DEA3902F2668C963 /* debug */,
+				437D4AFDFC5AB604EA13E2CC /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F32E3400C518AB2C8B501E08 /* Project object */;
+}

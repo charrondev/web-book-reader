@@ -1,0 +1,131 @@
+/*
+  Josh's Custom CSS Reset
+  https://www.joshwcomeau.com/css/custom-css-reset/
+*/
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+* {
+    margin: 0;
+    font-family: inherit;
+    -webkit-app-region: no-drag;
+}
+
+*,
+a,
+button {
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.text-selectable {
+    user-select: all;
+    -webkit-user-select: all;
+}
+
+.drag {
+    -webkit-app-region: drag;
+}
+
+.no-drag {
+    -webkit-app-region: no-drag;
+}
+
+body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+#root,
+#__next {
+    isolation: isolate;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+:root {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        avenir next,
+        avenir,
+        segoe ui,
+        helvetica neue,
+        helvetica,
+        Cantarell,
+        Ubuntu,
+        roboto,
+        noto,
+        arial,
+        sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    -webkit-overflow-scrolling: auto;
+
+    color: #0f0f0f;
+    background-color: #fff;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    --shadow-color: 0deg 0% 61%;
+    --shadow-elevation-low: 0.3px 0.5px 0.6px hsl(var(--shadow-color) / 0.41),
+        0.4px 0.8px 0.9px -1.5px hsl(var(--shadow-color) / 0.36),
+        1.1px 2px 2.4px -3px hsl(var(--shadow-color) / 0.32);
+    --shadow-elevation-medium: 0.3px 0.5px 0.6px hsl(var(--shadow-color) / 0.43),
+        0.8px 1.5px 1.8px -1px hsl(var(--shadow-color) / 0.39),
+        2.1px 3.9px 4.7px -2px hsl(var(--shadow-color) / 0.36),
+        5.3px 9.8px 11.7px -3px hsl(var(--shadow-color) / 0.32);
+    --shadow-elevation-high: 0.3px 0.5px 0.6px hsl(var(--shadow-color) / 0.4),
+        1.3px 2.4px 2.9px -0.4px hsl(var(--shadow-color) / 0.38),
+        2.5px 4.6px 5.5px -0.9px hsl(var(--shadow-color) / 0.36),
+        4.3px 7.8px 9.4px -1.3px hsl(var(--shadow-color) / 0.35),
+        7.1px 13px 15.6px -1.7px hsl(var(--shadow-color) / 0.33),
+        11.4px 21px 25.1px -2.1px hsl(var(--shadow-color) / 0.32),
+        17.7px 32.5px 38.9px -2.6px hsl(var(--shadow-color) / 0.3),
+        26.4px 48.6px 58.1px -3px hsl(var(--shadow-color) / 0.28);
+}
