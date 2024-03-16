@@ -1,3 +1,5 @@
+use migrations::migrations;
+
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate cocoa;
@@ -8,6 +10,8 @@ extern crate objc;
 
 #[cfg(target_os = "macos")]
 mod mac;
+
+mod migrations;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -20,6 +24,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_sql::Builder::default()
+        .add_migrations("sqlite:application.db", migrations())
+            .build()
+        )
         .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {

@@ -3,8 +3,6 @@ import { TitleBar } from "../ui/TitleBar";
 import { useQuery } from "@tanstack/react-query";
 import { RoyalRoadApi } from "../discover/RoyalRoadApi";
 import { BookGrid } from "../ui/BookGrid";
-import { SkeletonContext } from "../ui/SkeletonContext";
-import { Book } from "../Types";
 import { BookGridLoader } from "../ui/BookGrid.Loader";
 
 export const Route = createFileRoute("/discover")({
@@ -27,7 +25,7 @@ function DiscoverPage() {
             {booksQuery.isLoading && !booksQuery.data ? (
                 <BookGridLoader />
             ) : (
-                <BookGrid books={booksQuery.data} />
+                <BookGrid books={booksQuery.data!} />
             )}
         </div>
     );

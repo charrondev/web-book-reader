@@ -5,6 +5,7 @@
 
 import React, { useContext } from "react";
 import { Author, Book, BookCover, Html } from "../Types";
+import Database from "@tauri-apps/plugin-sql";
 
 export interface DBChapterContents {
     text: Html;
@@ -87,6 +88,59 @@ export interface IDatabaseClient {
     ): Promise<DbResult<null>>;
     getReaderSettings(): Promise<DbResult<DbReaderSettings>>;
     setReaderSettings(settings: DbReaderSettings): Promise<DbResult<null>>;
+}
+
+export class DatabaseClient implements IDatabaseClient {
+    public async db() {
+        return Database.load("sqlite:application.db");
+    }
+
+    public async getBooks(): Promise<
+        DbResult<DbBookStub[], { message: string }>
+    > {
+        const db = await this.db();
+        return db.select(`
+SELECT * FROM WBR_book
+`);
+    }
+
+    public async addDummyBook(): Promise<DbResult<{ bookID: string }>> {
+        const db = await this.db();
+        const result = await db.execute(`
+INSERT INTO WBR_book (title)
+VALUES ('A book title')
+`);
+        return {
+            result: { bookID: result.lastInsertId.toString() },
+            status: "success",
+        };
+    }
+    getBookDetails(
+        bookID: string,
+    ): Promise<DbResult<DbBook, { message: string }>> {
+        throw new Error("Method not implemented.");
+    }
+    getChapters(
+        bookID: string,
+    ): Promise<DbResult<DbChapter[], { message: string }>> {
+        throw new Error("Method not implemented.");
+    }
+    setBookProgress(
+        bookID: string,
+        progress: DbBookProgress,
+    ): Promise<DbResult<null, { message: string }>> {
+        throw new Error("Method not implemented.");
+    }
+    getReaderSettings(): Promise<
+        DbResult<DbReaderSettings, { message: string }>
+    > {
+        throw new Error("Method not implemented.");
+    }
+    setReaderSettings(
+        settings: DbReaderSettings,
+    ): Promise<DbResult<null, { message: string }>> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export const DatabaseContext = React.createContext<IDatabaseClient>({} as any);

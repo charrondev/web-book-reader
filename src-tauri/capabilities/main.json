@@ -12,6 +12,10 @@
         "resources:default",
         "menu:default",
         "tray:default",
+        "sql:allow-select",
+        "sql:allow-load",
+        "sql:allow-close",
+        "sql:allow-execute",
         "window:allow-set-title",
         "window:allow-start-dragging",
         {
