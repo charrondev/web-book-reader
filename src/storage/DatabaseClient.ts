@@ -32,15 +32,9 @@ export interface DbBookProgress {
 
 export interface DbBookStub extends Book {
     bookID: string;
-    title: string;
-    author: Author;
-    tags: string[];
     dateFirstChapter: string | null;
-    dateLastChapter: string | null;
     dateInserted: string;
     dateLastRead: string | null;
-    cover: BookCover;
-    countChapters: number;
     countPages: number;
     progress: DbBookProgress;
 }

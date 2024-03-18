@@ -18,6 +18,7 @@
         "sql:allow-execute",
         "window:allow-set-title",
         "window:allow-start-dragging",
+        "log:default",
         {
             "identifier": "http:allow-fetch",
             "allow": ["https://www.royalroad.com/*"]
