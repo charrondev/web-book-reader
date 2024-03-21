@@ -34,6 +34,20 @@ button {
     -webkit-app-region: no-drag;
 }
 
+document {
+    background: transparent;
+}
+
+body {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+    body {
+        background: #fff;
+    }
+}
+
 body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -84,27 +98,19 @@ h6 {
 }
 
 :root {
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        avenir next,
-        avenir,
-        segoe ui,
-        helvetica neue,
-        helvetica,
-        Cantarell,
-        Ubuntu,
-        roboto,
-        noto,
-        arial,
-        sans-serif;
+    --font-family-serif: "Georgia", "Iowan Old Style", "Palatino Linotype",
+        "URW Palladio L", P052, serif;
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, avenir next,
+        avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto,
+        noto, arial, sans-serif;
+
+    font-family: var(--font-family-sans-serif);
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
     -webkit-overflow-scrolling: auto;
 
     color: #0f0f0f;
-    background-color: #fff;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;

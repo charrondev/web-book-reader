@@ -12,19 +12,15 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
-import { Route as DiscoverImport } from './routes/discover'
 import { Route as BooksImport } from './routes/books'
 import { Route as IndexImport } from './routes/index'
+import { Route as DiscoverIndexImport } from './routes/discover.index'
+import { Route as DiscoverRoyalroadSplatImport } from './routes/discover.royalroad.$'
 
 // Create/Update Routes
 
 const SettingsRoute = SettingsImport.update({
   path: '/settings',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DiscoverRoute = DiscoverImport.update({
-  path: '/discover',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -35,6 +31,16 @@ const BooksRoute = BooksImport.update({
 
 const IndexRoute = IndexImport.update({
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DiscoverIndexRoute = DiscoverIndexImport.update({
+  path: '/discover/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DiscoverRoyalroadSplatRoute = DiscoverRoyalroadSplatImport.update({
+  path: '/discover/royalroad/$',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -50,12 +56,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksImport
       parentRoute: typeof rootRoute
     }
-    '/discover': {
-      preLoaderRoute: typeof DiscoverImport
-      parentRoute: typeof rootRoute
-    }
     '/settings': {
       preLoaderRoute: typeof SettingsImport
+      parentRoute: typeof rootRoute
+    }
+    '/discover/': {
+      preLoaderRoute: typeof DiscoverIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/discover/royalroad/$': {
+      preLoaderRoute: typeof DiscoverRoyalroadSplatImport
       parentRoute: typeof rootRoute
     }
   }
@@ -66,8 +76,9 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   BooksRoute,
-  DiscoverRoute,
   SettingsRoute,
+  DiscoverIndexRoute,
+  DiscoverRoyalroadSplatRoute,
 ])
 
 /* prettier-ignore-end */

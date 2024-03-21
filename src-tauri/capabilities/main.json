@@ -18,6 +18,8 @@
         "sql:allow-execute",
         "window:allow-set-title",
         "window:allow-start-dragging",
+        "process:allow-restart",
+        "process:allow-exit",
         "log:default",
         {
             "identifier": "http:allow-fetch",

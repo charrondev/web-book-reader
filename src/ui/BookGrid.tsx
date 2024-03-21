@@ -1,9 +1,11 @@
+import { Link } from "@tanstack/react-router";
 import { Book } from "../Types";
 import { isDbBook } from "../storage/DatabaseClient";
 import { BookCover } from "./BookCover";
 import { BookCoverLoader } from "./BookCover.Loader";
 import { Colors } from "./Colors";
 import { Placeholder } from "./SkeletonContext";
+import { ContentContainer } from "./ContentContainer";
 
 interface IProps {
     books: Book[];
@@ -11,56 +13,67 @@ interface IProps {
 
 export function BookGrid(props: IProps) {
     return (
-        <div
-            css={{
-                "--auto-grid-min-size": "120px",
-                display: "grid",
-                gridTemplateColumns:
-                    "repeat(auto-fill, minmax(var(--auto-grid-min-size), 1fr))",
-                gap: 16,
-                padding: 16,
-            }}
-        >
-            {props.books.map((book, i) => {
-                return (
-                    <div
-                        key={i}
-                        css={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
-                            justifyContent: "flex-end",
-                        }}
-                    >
-                        <Placeholder skeleton={<BookCoverLoader />}>
-                            <BookCover constrain="width" cover={book.cover} />
-                        </Placeholder>
-
-                        <div css={{ marginTop: 4, width: "100%" }}>
+        <ContentContainer>
+            <div
+                css={{
+                    "--auto-grid-min-size": "120px",
+                    display: "grid",
+                    gridTemplateColumns:
+                        "repeat(auto-fill, minmax(var(--auto-grid-min-size), 1fr))",
+                    gap: 16,
+                }}
+            >
+                {props.books.map((book, i) => {
+                    return (
+                        <Link
+                            key={i}
+                            to={book.url}
+                            css={{
+                                textDecoration: "none",
+                                color: "inherit",
+                            }}
+                        >
                             <div
                                 css={{
-                                    fontWeight: 600,
-                                    width: "100%",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    fontSize: 13,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "flex-start",
+                                    justifyContent: "flex-end",
                                 }}
                             >
-                                <Placeholder>{book.title}</Placeholder>
+                                <Placeholder skeleton={<BookCoverLoader />}>
+                                    <BookCover cover={book} />
+                                </Placeholder>
+
+                                <div css={{ marginTop: 8, width: "100%" }}>
+                                    <div
+                                        css={{
+                                            fontWeight: 600,
+                                            width: "100%",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            fontSize: 13,
+                                            textDecoration: "none",
+                                            color: Colors.Light.slate12,
+                                        }}
+                                    >
+                                        <Placeholder>{book.title}</Placeholder>
+                                    </div>
+                                </div>
+                                {isDbBook(book) && (
+                                    <BookProgress
+                                        css={{ marginTop: 2 }}
+                                        total={book.countPages}
+                                        completed={book.currentPage}
+                                    />
+                                )}
                             </div>
-                        </div>
-                        {isDbBook(book) && (
-                            <BookProgress
-                                css={{ marginTop: 2 }}
-                                total={book.countPages}
-                                completed={book.progress.currentPage}
-                            />
-                        )}
-                    </div>
-                );
-            })}
-        </div>
+                        </Link>
+                    );
+                })}
+            </div>
+        </ContentContainer>
     );
 }
 

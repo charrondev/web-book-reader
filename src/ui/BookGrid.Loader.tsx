@@ -21,9 +21,10 @@ export function BookGridLoader() {
 
 function dummyBook(title: string): Book {
     return {
-        cover: { url: "#" },
+        url: "#",
+        coverUrl: "#",
         countChapters: 42,
-        dateLastChapter: "",
+        dateLastChapter: new Date(),
         tags: [],
         title,
     };

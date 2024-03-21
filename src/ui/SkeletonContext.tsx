@@ -14,10 +14,10 @@ export const SkeletonContext = React.createContext({
 
 const pulseKeyframe = keyframes`
 from {
-    opacity: 0;
+    opacity: 0.7;
 }
 to {
-    opacity: 0.4,
+    opacity: 1,
 }
 `;
 

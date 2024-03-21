@@ -5,7 +5,9 @@
 
 import React, { useContext } from "react";
 import { Author, Book, BookCover, Html } from "../Types";
-import Database from "@tauri-apps/plugin-sql";
+import Database, { QueryResult } from "@tauri-apps/plugin-sql";
+import { invoke } from "@tauri-apps/api/core";
+import knex from "knex";
 
 export interface DBChapterContents {
     text: Html;
@@ -17,7 +19,7 @@ export interface DBChapterStub {
     chapterID: string;
     bookID: string;
     title: string;
-    datePublished: string;
+    datePublished: Date;
 }
 
 export interface DbChapter extends DBChapterStub {
@@ -30,14 +32,16 @@ export interface DbBookProgress {
     currentOffset: number;
 }
 
-export interface DbBookStub extends Book {
+export interface DbBookStub extends Book, DbBookProgress {
     bookID: string;
-    dateFirstChapter: string | null;
-    dateInserted: string;
-    dateLastRead: string | null;
+    aboutHtml: Html;
+    dateFirstChapter: Date | null;
+    dateInserted: Date;
+    dateLastRead: Date | null;
     countPages: number;
-    progress: DbBookProgress;
 }
+
+export type DbBookRow = Omit<DbBookStub, "tags" | keyof DbBookProgress>;
 
 export function isDbBook(book: Book): book is DbBookStub {
     return "bookID" in book;
@@ -56,7 +60,6 @@ export interface DbReaderSettings {
 }
 
 export interface DbBook extends DbBookStub {
-    about: Html;
     countReaders: number;
     countStars: number;
     chapters: DBChapterStub[];
@@ -72,6 +75,16 @@ export type DbResult<TSuccess, TError = { message: string }> =
           error: TError;
       };
 
+export type QueryBuilderCallback<T> = (
+    db: knex.Knex,
+) => knex.Knex.QueryBuilder<any, T>;
+
+export type ResolveKnexRowType<T> = T extends { _base: infer I }
+    ? I
+    : T extends Array<{ _base: infer I }>
+      ? I[]
+      : T;
+
 export interface IDatabaseClient {
     getBooks(): Promise<DbResult<DbBookStub[]>>;
     getBookDetails(bookID: string): Promise<DbResult<DbBook>>;
@@ -82,11 +95,57 @@ export interface IDatabaseClient {
     ): Promise<DbResult<null>>;
     getReaderSettings(): Promise<DbResult<DbReaderSettings>>;
     setReaderSettings(settings: DbReaderSettings): Promise<DbResult<null>>;
+    getDbPath(): Promise<string>;
+    execute(callback: QueryBuilderCallback<any>): Promise<QueryResult>;
+    fetch<T extends object>(
+        callback: QueryBuilderCallback<T>,
+    ): Promise<ResolveKnexRowType<T>>;
+    resetTables(): Promise<void>;
 }
 
 export class DatabaseClient implements IDatabaseClient {
     public async db() {
         return Database.load("sqlite:application.db");
+    }
+
+    public async resetTables() {
+        console.log("resetting tables");
+        const tables = await this.fetch((query) =>
+            query
+                .from("sqlite_schema")
+                .select("name")
+                .where("name", "NOT LIKE", "sqlite_%"),
+        );
+
+        for (const table of tables) {
+            await this.execute({
+                sql: `DROP TABLE IF EXISTS ${table.name}`,
+                bindings: [],
+            });
+        }
+
+        // Reload the DB.
+        const db = await this.db();
+        await db.close();
+        await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+        });
+        // Reload the db.
+        await this.db();
+    }
+
+    async fetch<T extends object>(
+        callback: QueryBuilderCallback<T>,
+    ): Promise<ResolveKnexRowType<T>> {
+        const sql = callback(
+            knex({
+                client: "sqlite3",
+                useNullAsDefault: true,
+            }),
+        ).toSQL();
+        const db = await this.db();
+        const result = await db.select<T>(sql.sql, Object.values(sql.bindings));
+        return result as any;
     }
 
     public async getBooks(): Promise<
@@ -96,6 +155,26 @@ export class DatabaseClient implements IDatabaseClient {
         return db.select(`
 SELECT * FROM WBR_book
 `);
+    }
+
+    async execute(
+        callback: QueryBuilderCallback<any> | { sql: string; bindings: any[] },
+    ): Promise<QueryResult> {
+        const sql =
+            typeof callback === "function"
+                ? callback(
+                      knex({
+                          client: "sqlite3",
+                          useNullAsDefault: true,
+                      }),
+                  ).toSQL()
+                : callback;
+        const db = await this.db();
+        const result = await db.execute(
+            sql.sql,
+            Object.values(sql.bindings ?? {}),
+        );
+        return result;
     }
 
     public async addDummyBook(): Promise<DbResult<{ bookID: string }>> {
@@ -134,6 +213,10 @@ VALUES ('A book title')
         settings: DbReaderSettings,
     ): Promise<DbResult<null, { message: string }>> {
         throw new Error("Method not implemented.");
+    }
+    async getDbPath(): Promise<string> {
+        const path = await invoke<string>("get_db_path");
+        return JSON.parse(path);
     }
 }
 

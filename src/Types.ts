@@ -4,18 +4,17 @@ export interface Author {
 }
 
 export interface BookCover {
+    coverUrl: string;
+}
+
+export type Html = string;
+
+export interface Book extends BookCover {
     url: string;
-}
-
-export interface Html {
-    __unsafeHtml: string;
-}
-
-export interface Book {
     title: string;
-    author?: Author;
+    authorName?: string | null;
     tags: string[];
-    dateLastChapter: string | null;
-    cover: BookCover;
+    dateLastChapter: Date | null;
+    coverUrl: string;
     countChapters: number;
 }

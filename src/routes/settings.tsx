@@ -1,29 +1,78 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleBar } from "../ui/TitleBar";
 import { useEffect } from "react";
-import { DatabaseClient } from "../storage/DatabaseClient";
+import {
+    DatabaseClient,
+    DbBookRow,
+    IDatabaseClient,
+    useDatabaseClient,
+} from "../storage/DatabaseClient";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import * as shell from "@tauri-apps/plugin-shell";
+import { knex } from "knex";
+import { DbUtils } from "../utils";
 
 export const Route = createFileRoute("/settings")({
     component: () => <SettingsPage />,
 });
 
 function SettingsPage() {
-    useEffect(() => {
-        testBed();
+    const db = useDatabaseClient();
+    const currentPathQuery = useQuery({
+        queryKey: ["db-path"],
+        queryFn: async () => {
+            const path = await db.getDbPath();
+            return { path };
+        },
+    });
+
+    const resetDbMutation = useMutation({
+        mutationFn: async () => {
+            await db.resetTables();
+            await testBed(db);
+        },
     });
 
     return (
         <div>
             <TitleBar title="Settings" />
+            <div>
+                <h2>Database Path</h2>
+                <p>{currentPathQuery.data?.path ?? "Loading"}</p>
+                <button
+                    type="button"
+                    onClick={() => {
+                        shell.open("file://" + currentPathQuery.data?.path);
+                    }}
+                >
+                    Open
+                </button>
+                <button
+                    type="button"
+                    onClick={() => {
+                        resetDbMutation.mutate();
+                    }}
+                >
+                    Reset
+                </button>
+            </div>
         </div>
     );
 }
 
-async function testBed() {
-    const dbclient = new DatabaseClient();
-    const newBook = await dbclient.addDummyBook();
-    console.log({ newBook });
-
-    const books = await dbclient.getBooks();
-    console.log({ books });
+async function testBed(db: IDatabaseClient) {
+    const insertResult = await db.execute((query) =>
+        query.table("WBR_book").insert({
+            bookID: DbUtils.uuidv4(),
+            dateFirstChapter: null,
+            dateLastChapter: null,
+            dateInserted: DbUtils.currentDate(),
+            dateLastRead: null,
+            countPages: 0,
+            countChapters: 0,
+            coverUrl: "https://example.com",
+            title: "Test Book",
+            aboutHtml: "Test book",
+        }),
+    );
 }

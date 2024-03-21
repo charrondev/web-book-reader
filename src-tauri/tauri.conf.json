@@ -9,6 +9,7 @@
         "frontendDist": "../dist"
     },
     "app": {
+        "macOSPrivateApi": true,
         "windows": [
             {
                 "title": "web-book-reader",
@@ -20,7 +21,8 @@
                 "acceptFirstMouse": true,
                 "hiddenTitle": true,
                 "decorations": true,
-                "url": "/books"
+                "url": "/books",
+                "transparent": true
             }
         ],
         "security": {

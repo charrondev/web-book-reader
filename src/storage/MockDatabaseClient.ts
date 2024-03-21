@@ -7,8 +7,12 @@ import {
     DbChapter,
     DbBookProgress,
     DbReaderSettings,
+    QueryBuilderCallback,
+    ResolveKnexRowType,
 } from "./DatabaseClient";
 import { Html } from "../Types";
+import { QueryResult } from "@tauri-apps/plugin-sql";
+import { QueryBuilder, Knex } from "knex";
 
 const CHAPTER_TEXT: Html = {
     __unsafeHtml: `
@@ -60,7 +64,7 @@ const MOCK_CHAPTERS: DbChapter[] = [
         title: "Good Morning Brother",
         bookID: "mother_of_learning",
         chapterID: "good_morning_brother",
-        datePublished: "2022-01-01T00:00:00Z",
+        datePublished: new Date("2022-01-01T00:00:00Z"),
         contents: {
             text: CHAPTER_TEXT,
             noteBefore: null,
@@ -71,7 +75,7 @@ const MOCK_CHAPTERS: DbChapter[] = [
         title: "Life's Little Problems",
         bookID: "mother_of_learning",
         chapterID: "lifes_little_problems",
-        datePublished: "2022-01-04T00:00:00Z",
+        datePublished: new Date("2022-01-04T00:00:00Z"),
         contents: {
             text: CHAPTER_TEXT,
             noteBefore: null,
@@ -82,7 +86,7 @@ const MOCK_CHAPTERS: DbChapter[] = [
         title: "Chapter 3",
         bookID: "mother_of_learning",
         chapterID: "chapter3",
-        datePublished: "2022-01-07T00:00:00Z",
+        datePublished: new Date("2022-01-07T00:00:00Z"),
         contents: {
             text: CHAPTER_TEXT,
             noteBefore: null,
@@ -99,124 +103,104 @@ const MOCK_PROGRESS: DbBookProgress = {
 
 export const MOCK_BOOKS = {
     MotherOfLearning: {
+        url: "/books/mother_of_learning",
         bookID: "mother_of_learning",
         title: "My Awesome Book - Very Very Very Long",
-        author: {
-            name: "Adam Charron",
-            url: "https://charron.dev",
-        },
+        authorName: "Adam Charron",
         tags: ["Test", "Awesome", "Mock"],
-        dateFirstChapter: "2022-01-01T00:00:00Z",
-        dateLastChapter: "2022-01-01T00:00:00Z",
-        dateInserted: "2022-01-01T00:00:00Z",
-        dateLastRead: "2022-01-01T00:00:00Z",
-        cover: {
-            url: "https://www.royalroadcdn.com/public/covers-full/21220-mother-of-learning.jpg?time=1637247458",
-        },
+        dateFirstChapter: new Date("2022-01-01T00:00:00Z"),
+        dateLastChapter: new Date("2022-01-01T00:00:00Z"),
+        dateInserted: new Date("2022-01-01T00:00:00Z"),
+        dateLastRead: new Date("2022-01-01T00:00:00Z"),
+        coverUrl:
+            "https://www.royalroadcdn.com/public/covers-full/21220-mother-of-learning.jpg?time=1637247458",
         countChapters: 242,
         countPages: 11324,
-        about: {
-            __unsafeHtml: `
+        aboutHtml: `
                 <p>Zorian is a teenage mage of humble birth and slightly above-average skill, attending his third year of education at Cyoria's magical academy. He is a driven and irritable young man, consumed by a desire to ensure his own future and free himself of the influence of his family, whom he resents for favoring his brothers over him. Consequently, he has no time for pointless distractions or paying attention to other people's problems. As it happens, time is something he is about to get plenty of. On the eve of the Cyoria's annual summer festival, he is killed and brought back to the beginning of the month, just before he was about to take a train to Cyoria. Suddenly trapped in a time loop with no clear end or exit, Zorian will have to look both within and without to unravel the mystery before him. And he does have to unravel it, for the time loop hadn't been made for his sake and dangers lurk everywhere... Repetition is the mother of learning, but Zorian will have to first make sure he survives to try again - in a world of magic, even a time traveler isn't safe from those who wish him ill.</p>
                 <p>**********************************</p>
                 <p>Mother of Learning is now <a href="https://www.royalroad.com/amazon/B09M2R6QLF" rel="noopener ugc nofollow">available for sale on Amazon</a>. The story will remain available in full here on Royal Road and on Fictionpress, but if you're more interested to read the story as a Kindle Edition e-book you now have a way to do that.</p>
                 <p>The audiobooks can be found <a href="https://www.audible.com/author/Domagoj-Kurmaic/B09M8ZV2J2" rel="noopener ugc nofollow">on this link here</a>. The physical edition is available through a Kickstarter campaign, which <a href="https://www.kickstarter.com/projects/wraithmarked/mol3and4" rel="noopener ugc nofollow">can be found here</a>.</p>
             `,
-        },
         countReaders: 24324,
         countStars: 4134,
         chapters: MOCK_CHAPTERS,
-        progress: MOCK_PROGRESS,
+        ...MOCK_PROGRESS,
     } as DbBook,
     SuperSupportive: {
+        url: "/books/super_supportive",
         bookID: "super_supportive",
         title: "Super Supportive",
-        author: {
-            name: "Adam Charron",
-            url: "https://charron.dev",
-        },
+        authorName: "Adam Charron",
         tags: ["Original", "LitRPG", "ProgressionFantasy"],
-        dateFirstChapter: "2022-01-01T00:00:00Z",
-        dateLastChapter: "2022-01-01T00:00:00Z",
-        dateInserted: "2022-01-01T00:00:00Z",
-        dateLastRead: "2022-01-01T00:00:00Z",
-        cover: {
-            url: "https://www.royalroadcdn.com/public/covers-large/63759-super-supportive.jpg?time=1691780497",
-        },
+        dateFirstChapter: new Date("2022-01-01T00:00:00Z"),
+        dateLastChapter: new Date("2022-01-01T00:00:00Z"),
+        dateInserted: new Date("2022-01-01T00:00:00Z"),
+        dateLastRead: new Date("2022-01-01T00:00:00Z"),
+        coverUrl:
+            "https://www.royalroadcdn.com/public/covers-large/63759-super-supportive.jpg?time=1691780497",
         countChapters: 195,
         countPages: 7324,
-        about: {
-            __unsafeHtml: `
+        aboutHtml: `
                 <p>Zorian is a teenage mage of humble birth and slightly above-average skill, attending his third year of education at Cyoria's magical academy. He is a driven and irritable young man, consumed by a desire to ensure his own future and free himself of the influence of his family, whom he resents for favoring his brothers over him. Consequently, he has no time for pointless distractions or paying attention to other people's problems. As it happens, time is something he is about to get plenty of. On the eve of the Cyoria's annual summer festival, he is killed and brought back to the beginning of the month, just before he was about to take a train to Cyoria. Suddenly trapped in a time loop with no clear end or exit, Zorian will have to look both within and without to unravel the mystery before him. And he does have to unravel it, for the time loop hadn't been made for his sake and dangers lurk everywhere... Repetition is the mother of learning, but Zorian will have to first make sure he survives to try again - in a world of magic, even a time traveler isn't safe from those who wish him ill.</p>
                 <p>**********************************</p>
                 <p>Mother of Learning is now <a href="https://www.royalroad.com/amazon/B09M2R6QLF" rel="noopener ugc nofollow">available for sale on Amazon</a>. The story will remain available in full here on Royal Road and on Fictionpress, but if you're more interested to read the story as a Kindle Edition e-book you now have a way to do that.</p>
                 <p>The audiobooks can be found <a href="https://www.audible.com/author/Domagoj-Kurmaic/B09M8ZV2J2" rel="noopener ugc nofollow">on this link here</a>. The physical edition is available through a Kickstarter campaign, which <a href="https://www.kickstarter.com/projects/wraithmarked/mol3and4" rel="noopener ugc nofollow">can be found here</a>.</p>
             `,
-        },
         countReaders: 12432,
         countStars: 1413,
         chapters: MOCK_CHAPTERS,
-        progress: MOCK_PROGRESS,
+        ...MOCK_PROGRESS,
     } as DbBook,
     ThePerfectRun: {
+        url: "/books/perfect_run",
         bookID: "perfect_run",
         title: "The Perfect Run",
-        author: {
-            name: "Adam Charron",
-            url: "https://charron.dev",
-        },
+        authorName: "Adam Charron",
         tags: ["Original", "LitRPG", "ProgressionFantasy"],
-        dateFirstChapter: "2022-01-01T00:00:00Z",
-        dateLastChapter: "2022-01-01T00:00:00Z",
-        dateInserted: "2022-01-01T00:00:00Z",
-        dateLastRead: "2022-01-01T00:00:00Z",
-        cover: {
-            url: "https://www.royalroadcdn.com/public/covers-full/36735-the-perfect-run.jpg?time=1604749383",
-        },
+        dateFirstChapter: new Date("2022-01-01T00:00:00Z"),
+        dateLastChapter: new Date("2022-01-01T00:00:00Z"),
+        dateInserted: new Date("2022-01-01T00:00:00Z"),
+        dateLastRead: new Date("2022-01-01T00:00:00Z"),
+        coverUrl:
+            "https://www.royalroadcdn.com/public/covers-full/36735-the-perfect-run.jpg?time=1604749383",
         countChapters: 195,
         countPages: 724,
-        about: {
-            __unsafeHtml: `
+        aboutHtml: `
                 <p>Zorian is a teenage mage of humble birth and slightly above-average skill, attending his third year of education at Cyoria's magical academy. He is a driven and irritable young man, consumed by a desire to ensure his own future and free himself of the influence of his family, whom he resents for favoring his brothers over him. Consequently, he has no time for pointless distractions or paying attention to other people's problems. As it happens, time is something he is about to get plenty of. On the eve of the Cyoria's annual summer festival, he is killed and brought back to the beginning of the month, just before he was about to take a train to Cyoria. Suddenly trapped in a time loop with no clear end or exit, Zorian will have to look both within and without to unravel the mystery before him. And he does have to unravel it, for the time loop hadn't been made for his sake and dangers lurk everywhere... Repetition is the mother of learning, but Zorian will have to first make sure he survives to try again - in a world of magic, even a time traveler isn't safe from those who wish him ill.</p>
                 <p>**********************************</p>
                 <p>Mother of Learning is now <a href="https://www.royalroad.com/amazon/B09M2R6QLF" rel="noopener ugc nofollow">available for sale on Amazon</a>. The story will remain available in full here on Royal Road and on Fictionpress, but if you're more interested to read the story as a Kindle Edition e-book you now have a way to do that.</p>
                 <p>The audiobooks can be found <a href="https://www.audible.com/author/Domagoj-Kurmaic/B09M8ZV2J2" rel="noopener ugc nofollow">on this link here</a>. The physical edition is available through a Kickstarter campaign, which <a href="https://www.kickstarter.com/projects/wraithmarked/mol3and4" rel="noopener ugc nofollow">can be found here</a>.</p>
             `,
-        },
         countReaders: 432,
         countStars: 113,
         chapters: MOCK_CHAPTERS,
-        progress: MOCK_PROGRESS,
+        ...MOCK_PROGRESS,
     } as DbBook,
     SuperMinion: {
+        url: "/books/superminion",
         bookID: "superminion",
         title: "Super Minion",
-        author: {
-            name: "Adam Charron",
-            url: "https://charron.dev",
-        },
+        authorName: "Adam Charron",
         tags: ["Original", "LitRPG", "ProgressionFantasy"],
-        dateFirstChapter: "2022-01-01T00:00:00Z",
-        dateLastChapter: "2022-01-01T00:00:00Z",
-        dateInserted: "2022-01-01T00:00:00Z",
-        dateLastRead: "2022-01-01T00:00:00Z",
-        cover: {
-            url: "https://www.royalroadcdn.com/public/covers-large/21410-super-minion.jpg?time=1679784929",
-        },
+        dateFirstChapter: new Date("2022-01-01T00:00:00Z"),
+        dateLastChapter: new Date("2022-01-01T00:00:00Z"),
+        dateInserted: new Date("2022-01-01T00:00:00Z"),
+        dateLastRead: new Date("2022-01-01T00:00:00Z"),
+        coverUrl:
+            "https://www.royalroadcdn.com/public/covers-large/21410-super-minion.jpg?time=1679784929",
         countChapters: 195,
         countPages: 724,
-        about: {
-            __unsafeHtml: `
+        aboutHtml: `
                 <p>Zorian is a teenage mage of humble birth and slightly above-average skill, attending his third year of education at Cyoria's magical academy. He is a driven and irritable young man, consumed by a desire to ensure his own future and free himself of the influence of his family, whom he resents for favoring his brothers over him. Consequently, he has no time for pointless distractions or paying attention to other people's problems. As it happens, time is something he is about to get plenty of. On the eve of the Cyoria's annual summer festival, he is killed and brought back to the beginning of the month, just before he was about to take a train to Cyoria. Suddenly trapped in a time loop with no clear end or exit, Zorian will have to look both within and without to unravel the mystery before him. And he does have to unravel it, for the time loop hadn't been made for his sake and dangers lurk everywhere... Repetition is the mother of learning, but Zorian will have to first make sure he survives to try again - in a world of magic, even a time traveler isn't safe from those who wish him ill.</p>
                 <p>**********************************</p>
                 <p>Mother of Learning is now <a href="https://www.royalroad.com/amazon/B09M2R6QLF" rel="noopener ugc nofollow">available for sale on Amazon</a>. The story will remain available in full here on Royal Road and on Fictionpress, but if you're more interested to read the story as a Kindle Edition e-book you now have a way to do that.</p>
                 <p>The audiobooks can be found <a href="https://www.audible.com/author/Domagoj-Kurmaic/B09M8ZV2J2" rel="noopener ugc nofollow">on this link here</a>. The physical edition is available through a Kickstarter campaign, which <a href="https://www.kickstarter.com/projects/wraithmarked/mol3and4" rel="noopener ugc nofollow">can be found here</a>.</p>
             `,
-        },
         countReaders: 432,
         countStars: 113,
         chapters: MOCK_CHAPTERS,
-        progress: MOCK_PROGRESS,
+        ...MOCK_PROGRESS,
     } as DbBook,
 };
 
@@ -278,4 +262,20 @@ export class MockDatabaseClient implements IDatabaseClient {
             result: null,
         });
     }
+
+    getDbPath(): Promise<string> {
+        return Promise.resolve("/path/to/fake/database.db");
+    }
+
+    execute(callback: QueryBuilderCallback<any>): Promise<QueryResult> {
+        throw new Error("Method not implemented.");
+    }
+
+    fetch<T extends object>(
+        callback: QueryBuilderCallback<T>,
+    ): Promise<ResolveKnexRowType<T>> {
+        throw new Error("Method not implemented.");
+    }
+
+    public async resetTables() {}
 }

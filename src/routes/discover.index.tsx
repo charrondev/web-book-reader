@@ -5,7 +5,7 @@ import { RoyalRoadApi } from "../discover/RoyalRoadApi";
 import { BookGrid } from "../ui/BookGrid";
 import { BookGridLoader } from "../ui/BookGrid.Loader";
 
-export const Route = createFileRoute("/discover")({
+export const Route = createFileRoute("/discover/")({
     component: () => {
         return <DiscoverPage />;
     },

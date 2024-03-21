@@ -1,5 +1,6 @@
 use hex_color::HexColor;
 use tauri::{App, Manager, Runtime, WebviewWindow};
+use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
 // If anything breaks on macOS, this should be the place which is broken
 // We have to override Tauri (Tao) 's built-in NSWindowDelegate implementation with a
@@ -378,6 +379,10 @@ pub fn setup_mac_window(app: &mut App) {
 
     let window_handle = app.get_webview_window("main").unwrap();
     update_window_theme(&window_handle, HexColor::WHITE);
+
+    #[cfg(target_os = "macos")]
+    apply_vibrancy(&window_handle, NSVisualEffectMaterial::HudWindow, None, None)
+    .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
     // Control window theme based on app update_window
     // app.listen_global("hopp-bg-changed", move |ev| {

@@ -4357,6 +4357,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tauri-plugin-process"
+version = "2.0.0-beta.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0e3a9a8fcce829133941bbd2f164114cf7feb012a6c06a8c4b7e531a8dcd01d"
+dependencies = [
+ "tauri",
+ "tauri-plugin",
+]
+
+[[package]]
 name = "tauri-plugin-shell"
 version = "2.0.0-beta.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5191,9 +5201,11 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-http",
  "tauri-plugin-log",
+ "tauri-plugin-process",
  "tauri-plugin-shell",
  "tauri-plugin-sql",
  "tauri-plugin-window-state",
+ "window-vibrancy",
 ]
 
 [[package]]

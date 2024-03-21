@@ -7,7 +7,7 @@ const backgroundShimmerAnimation = keyframes({
     "100%": { backgroundPosition: "1000px 0" },
 });
 
-export function BookCoverLoader() {
+export function BookCoverLoader(props: { height?: number }) {
     const colorStart = Colors.Light.slate3; // "rgba(0, 0, 0, 0.04)";
     const colorEnd = Colors.Light.slate4; // "rgba(0, 0, 0, 0.09)";
 
@@ -17,7 +17,12 @@ export function BookCoverLoader() {
                 position: "relative",
                 boxShadow: "var(--shadow-elevation-low)",
                 borderRadius: 6,
-                width: "100%",
+                ...(props.height
+                    ? { height: props.height }
+                    : {
+                          width: "100%",
+                      }),
+
                 aspectRatio: "2 / 3",
                 background: `linear-gradient(to right, ${colorStart} 6%, ${colorEnd} 25%, ${colorStart} 34%)`,
                 backgroundSize: "1000px 100%",

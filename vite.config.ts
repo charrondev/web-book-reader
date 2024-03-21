@@ -2,12 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { internalIpV4 } from "internal-ip";
 import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-// @ts-expect-error process is a nodejs global
 const mobile = !!/android|ios/.exec(process.env.TAURI_ENV_PLATFORM);
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
+    define: {
+        requireFromFile: null,
+        "process.platform": null,
+        "process.version": null,
+        "process.env.NODE_DEBUG": false,
+    },
     plugins: [
         react({
             jsxImportSource: "@emotion/react",
@@ -22,10 +28,11 @@ export default defineConfig(async () => ({
                     },
                 ],
             ],
-        }),
+        }) as any,
         TanStackRouterVite({
             routesDirectory: "./src/routes",
         }),
+        nodePolyfills(),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
