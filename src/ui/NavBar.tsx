@@ -3,7 +3,6 @@
  * @license GPL-3.0-only
  */
 
-import styled from "@emotion/styled";
 import { Link } from "@tanstack/react-router";
 import React from "react";
 import {
@@ -26,43 +25,61 @@ export function DesktopNavBar(props: { className?: string }) {
                     left: 0,
                     top: 0,
                     bottom: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 4,
                     width: 200,
+                    minWidth: 200,
                     maxWidth: 200,
                     overflowX: "hidden",
-                    justifyContent: "flex-start",
-                    alignItems: "flex-start",
-                    padding: "56px 12px",
-                    overflowY: "scroll",
-                    "-webkit-overflow-scrolling": "touch",
-                    overscrollBehavior: "contain",
                     zIndex: 5,
                 }}
             >
-                <SearchBar />
-                <NavItem
-                    isDesktop
-                    to="/books"
-                    icon={<IoLibraryOutline />}
-                    iconActive={<IoLibrary />}
-                    label={"Library"}
-                />
-                <NavItem
-                    isDesktop
-                    to="/discover"
-                    icon={<IoSearch />}
-                    iconActive={<IoSearch />}
-                    label={"Discover"}
-                />
-                <NavItem
-                    isDesktop
-                    to="/settings"
-                    icon={<IoSettingsOutline />}
-                    iconActive={<IoSettings />}
-                    label={"Settings"}
-                />
+                <div
+                    data-tauri-drag-region
+                    css={{
+                        background: "rgba(255, 255, 255, 0.5)",
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0,
+                    }}
+                ></div>
+                <div
+                    data-tauri-drag-region
+                    css={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                        padding: "56px 12px",
+                        overflowY: "scroll",
+                        overscrollBehavior: "contain",
+                        position: "relative",
+                    }}
+                >
+                    <SearchBar />
+                    <NavItem
+                        isDesktop
+                        to="/books"
+                        icon={<IoLibraryOutline />}
+                        iconActive={<IoLibrary />}
+                        label={"Library"}
+                    />
+                    <NavItem
+                        isDesktop
+                        to="/discover"
+                        icon={<IoSearch />}
+                        iconActive={<IoSearch />}
+                        label={"Discover"}
+                    />
+                    <NavItem
+                        isDesktop
+                        to="/settings"
+                        icon={<IoSettingsOutline />}
+                        iconActive={<IoSettings />}
+                        label={"Settings"}
+                    />
+                </div>
             </nav>
             <div css={{ width: "200px", height: "100vh" }}></div>
         </>

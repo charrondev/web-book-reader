@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 function fallbackRender({ error, resetErrorBoundary }: FallbackProps) {
@@ -22,6 +22,9 @@ function fallbackRender({ error, resetErrorBoundary }: FallbackProps) {
 export function ErrorHandler(props: { children: React.ReactNode }) {
     return (
         <ErrorBoundary
+            onError={(error, info) => {
+                console.error(error, info);
+            }}
             fallbackRender={fallbackRender}
             onReset={(details) => {
                 // Reset the state of your app so the error doesn't happen again

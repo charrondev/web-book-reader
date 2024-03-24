@@ -1,16 +1,14 @@
 import * as cheerio from "cheerio";
-import { Book } from "../Types";
+import { Book, type Chapter, type ChapterStub } from "../Types";
 import { fetch } from "@tauri-apps/plugin-http";
 
-interface RoyalRoadBook extends Book {
-    rrUrl: string;
+interface RoyalRoadItem {
+    rrSlug: string;
 }
 
-interface RoyalRoadChapterStub {
-    rrUrl: string;
-    title: string;
-    datePublished: Date;
-}
+type RoyalRoadBook = Book & RoyalRoadItem;
+type RoyalRoadChapterStub = ChapterStub & RoyalRoadItem;
+type RoyalRoadChapter = Chapter & RoyalRoadItem;
 
 interface RoyalRoadBookDetails extends RoyalRoadBook {
     chapters: RoyalRoadChapterStub[];
@@ -35,17 +33,17 @@ const RoyalRoadSort = {
     new: "Newest",
 };
 
-type UrlAble = { rrUrl: string } | string;
+type UrlAble = RoyalRoadItem | string;
 
 export class RoyalRoadApi {
-    public static rrUrlPath(urlable: UrlAble): string {
-        const urlPiece = typeof urlable === "string" ? urlable : urlable.rrUrl;
+    public static rrSlug(urlable: UrlAble): string {
+        const urlPiece = typeof urlable === "string" ? urlable : urlable.rrSlug;
         const urlPath = urlPiece.replace(BASE_URL, "").replace(/^\//, "");
         return urlPath;
     }
 
     public static rrUrl(urlable: UrlAble): string {
-        const urlPath = this.rrUrlPath(urlable);
+        const urlPath = this.rrSlug(urlable);
         return [BASE_URL, urlPath].map((piece) => piece.trim()).join("/");
     }
 
@@ -73,11 +71,14 @@ export class RoyalRoadApi {
         urlable: UrlAble,
     ): Promise<RoyalRoadBookDetails> {
         const html = await this.getHtml(urlable);
-        const book = RoyalRoadParser.parseDetails(
-            this.rrUrlPath(urlable),
-            html,
-        );
+        const book = RoyalRoadParser.parseDetails(this.rrSlug(urlable), html);
         return book;
+    }
+
+    public static async chapter(urlable: UrlAble): Promise<RoyalRoadChapter> {
+        const html = await this.getHtml(urlable);
+        const chapter = RoyalRoadParser.parseChapter(html);
+        return chapter;
     }
 }
 
@@ -107,10 +108,9 @@ class RoyalRoadParser {
             .find("a")
             .text()
             .trim();
-        const authorUrl = authorEl
-            .find(".mt-card-content")
-            .find("a")
-            .attr("href")!;
+        const authorUrl = RoyalRoadApi.rrUrl(
+            authorEl.find(".mt-card-content").find("a").attr("href")!,
+        );
         const authorAvatarUrl = authorEl
             .find('img[data-type="avatar"]')
             .attr("src")!;
@@ -124,10 +124,13 @@ class RoyalRoadParser {
             }
             const label = $(el).text().toLowerCase().replace(":", "").trim();
             const $valueNode = $(el).next();
-            if ($valueNode.hasClass("star")) {
+
+            const $starElem = $valueNode.find(".star");
+            if ($starElem.length > 0) {
                 // We are parsing a float of the number of stars.
                 const countStars = Number.parseFloat(
-                    $valueNode
+                    $starElem
+                        .first()
                         .attr("aria-label")
                         ?.replace("stars", "")
                         ?.trim() ?? "0",
@@ -135,10 +138,8 @@ class RoyalRoadParser {
                 statsByName[label] = countStars;
             } else {
                 // We are a normal number.
-                const value = Number.parseInt(
-                    $valueNode.text().replace(",", ""),
-                    10,
-                );
+                const text = $valueNode.text().replaceAll(",", "");
+                const value = Number.parseInt(text, 10);
                 statsByName[label] = value;
             }
         });
@@ -147,7 +148,7 @@ class RoyalRoadParser {
 
         return {
             url: `/discover/royalroad/${rrUrlPath}`,
-            rrUrl: RoyalRoadApi.rrUrl(rrUrlPath),
+            rrSlug: RoyalRoadApi.rrUrl(rrUrlPath),
             title,
             coverUrl,
             authorName,
@@ -167,6 +168,28 @@ class RoyalRoadParser {
         };
     }
 
+    public static parseChapter(html: string): RoyalRoadChapter {
+        const $ = cheerio.load(html);
+        const title = $("h1").text();
+        const contentHtml = $(".chapter-content").html() ?? "";
+        const noteBefore = $(".chapter-note-before").html() ?? null;
+        const noteAfter = $(".chapter-note-after").html() ?? null;
+        const datePublished = new Date(
+            $(".fa-calender[title='Published'] + time").attr("datetime")!,
+        );
+
+        return {
+            rrSlug: RoyalRoadApi.rrSlug(
+                $("link[rel='canonical']").attr("href")!,
+            ),
+            title,
+            datePublished,
+            contentHtml,
+            noteBefore,
+            noteAfter,
+        };
+    }
+
     public static parseChapters(html: string): RoyalRoadChapterStub[] {
         const $ = cheerio.load(html);
         const chapters: RoyalRoadChapterStub[] = [];
@@ -174,7 +197,7 @@ class RoyalRoadParser {
         $(".chapter-row").each((i, el) => {
             chapters.push({
                 title: $(el).find("td").eq(0).find("a").text().trim(),
-                rrUrl: $(el).find("a").first().attr("href")!,
+                rrSlug: $(el).find("a").first().attr("href")!,
                 datePublished: new Date(
                     $(el).find("td").eq(1).find("time").attr("datetime")!,
                 ),
@@ -209,7 +232,7 @@ class RoyalRoadParser {
 
             books.push({
                 ...common,
-                url: `/discover/royalroad/${RoyalRoadApi.rrUrlPath(common.rrUrl)}`,
+                url: `/discover/royalroad/${RoyalRoadApi.rrSlug(common.rrSlug)}`,
                 dateLastChapter: new Date(dateLastChapter),
                 countChapters: Number.isNaN(countChapters) ? 0 : countChapters,
             });
@@ -323,7 +346,7 @@ class RoyalRoadParser {
             tags,
             title,
             coverUrl: imageSrc,
-            rrUrl,
+            rrSlug: rrUrl,
         };
     }
 }

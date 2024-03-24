@@ -13,11 +13,15 @@
         "windows": [
             {
                 "title": "web-book-reader",
-                "width": 393,
-                "height": 800,
+                "width": 960,
+                "height": 600,
                 "minWidth": 320,
                 "minHeight": 480,
                 "titleBarStyle": "Overlay",
+                "windowEffects": {
+                    "effects": ["hudWindow"]
+                },
+                "theme": "Light",
                 "acceptFirstMouse": true,
                 "hiddenTitle": true,
                 "decorations": true,

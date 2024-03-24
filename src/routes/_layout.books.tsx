@@ -11,7 +11,7 @@ type BookSearchSortOptions =
 type BooksSearch = {
     sort?: BookSearchSortOptions;
 };
-export const Route = createFileRoute("/books")({
+export const Route = createFileRoute("/_layout/books")({
     component: BooksPage,
     validateSearch: (search: Record<string, unknown>): BooksSearch => {
         return {

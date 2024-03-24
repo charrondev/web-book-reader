@@ -8,6 +8,7 @@ import { Author, Book, BookCover, Html } from "../Types";
 import Database, { QueryResult } from "@tauri-apps/plugin-sql";
 import { invoke } from "@tauri-apps/api/core";
 import knex from "knex";
+import type { ReaderSettings } from "../ui/reader/ReaderSettings.types";
 
 export interface DBChapterContents {
     text: Html;
@@ -47,18 +48,6 @@ export function isDbBook(book: Book): book is DbBookStub {
     return "bookID" in book;
 }
 
-export interface DbReaderSettings {
-    fontSize: number;
-    headingFontSize: number;
-    fontFamily: string;
-    isBold: boolean;
-    lineHeight: number;
-    paragraphSpacing: number;
-    contentPadding: number;
-    isJustified: boolean;
-    isIndented: boolean;
-}
-
 export interface DbBook extends DbBookStub {
     countReaders: number;
     countStars: number;
@@ -93,8 +82,8 @@ export interface IDatabaseClient {
         bookID: string,
         progress: DbBookProgress,
     ): Promise<DbResult<null>>;
-    getReaderSettings(): Promise<DbResult<DbReaderSettings>>;
-    setReaderSettings(settings: DbReaderSettings): Promise<DbResult<null>>;
+    getReaderSettings(): Promise<DbResult<ReaderSettings>>;
+    setReaderSettings(settings: ReaderSettings): Promise<DbResult<null>>;
     getDbPath(): Promise<string>;
     execute(callback: QueryBuilderCallback<any>): Promise<QueryResult>;
     fetch<T extends object>(
@@ -205,12 +194,12 @@ VALUES ('A book title')
         throw new Error("Method not implemented.");
     }
     getReaderSettings(): Promise<
-        DbResult<DbReaderSettings, { message: string }>
+        DbResult<ReaderSettings, { message: string }>
     > {
         throw new Error("Method not implemented.");
     }
     setReaderSettings(
-        settings: DbReaderSettings,
+        settings: ReaderSettings,
     ): Promise<DbResult<null, { message: string }>> {
         throw new Error("Method not implemented.");
     }

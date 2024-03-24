@@ -12,10 +12,12 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
-import { Route as BooksImport } from './routes/books'
+import { Route as LayoutImport } from './routes/_layout'
 import { Route as IndexImport } from './routes/index'
-import { Route as DiscoverIndexImport } from './routes/discover.index'
-import { Route as DiscoverRoyalroadSplatImport } from './routes/discover.royalroad.$'
+import { Route as LayoutBooksImport } from './routes/_layout.books'
+import { Route as LayoutDiscoverIndexImport } from './routes/_layout.discover.index'
+import { Route as DiscoverRoyalroadChapterSplatImport } from './routes/discover.royalroad.chapter_.$'
+import { Route as LayoutDiscoverRoyalroadSplatImport } from './routes/_layout.discover.royalroad.$'
 
 // Create/Update Routes
 
@@ -24,8 +26,8 @@ const SettingsRoute = SettingsImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const BooksRoute = BooksImport.update({
-  path: '/books',
+const LayoutRoute = LayoutImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -34,15 +36,27 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const DiscoverIndexRoute = DiscoverIndexImport.update({
-  path: '/discover/',
-  getParentRoute: () => rootRoute,
+const LayoutBooksRoute = LayoutBooksImport.update({
+  path: '/books',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
-const DiscoverRoyalroadSplatRoute = DiscoverRoyalroadSplatImport.update({
-  path: '/discover/royalroad/$',
-  getParentRoute: () => rootRoute,
+const LayoutDiscoverIndexRoute = LayoutDiscoverIndexImport.update({
+  path: '/discover/',
+  getParentRoute: () => LayoutRoute,
 } as any)
+
+const DiscoverRoyalroadChapterSplatRoute =
+  DiscoverRoyalroadChapterSplatImport.update({
+    path: '/discover/royalroad/chapter/$',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const LayoutDiscoverRoyalroadSplatRoute =
+  LayoutDiscoverRoyalroadSplatImport.update({
+    path: '/discover/royalroad/$',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -52,20 +66,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/books': {
-      preLoaderRoute: typeof BooksImport
+    '/_layout': {
+      preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
     '/settings': {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
-    '/discover/': {
-      preLoaderRoute: typeof DiscoverIndexImport
-      parentRoute: typeof rootRoute
+    '/_layout/books': {
+      preLoaderRoute: typeof LayoutBooksImport
+      parentRoute: typeof LayoutImport
     }
-    '/discover/royalroad/$': {
-      preLoaderRoute: typeof DiscoverRoyalroadSplatImport
+    '/_layout/discover/': {
+      preLoaderRoute: typeof LayoutDiscoverIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/discover/royalroad/$': {
+      preLoaderRoute: typeof LayoutDiscoverRoyalroadSplatImport
+      parentRoute: typeof LayoutImport
+    }
+    '/discover/royalroad/chapter/$': {
+      preLoaderRoute: typeof DiscoverRoyalroadChapterSplatImport
       parentRoute: typeof rootRoute
     }
   }
@@ -75,10 +97,13 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  BooksRoute,
+  LayoutRoute.addChildren([
+    LayoutBooksRoute,
+    LayoutDiscoverIndexRoute,
+    LayoutDiscoverRoyalroadSplatRoute,
+  ]),
   SettingsRoute,
-  DiscoverIndexRoute,
-  DiscoverRoyalroadSplatRoute,
+  DiscoverRoyalroadChapterSplatRoute,
 ])
 
 /* prettier-ignore-end */

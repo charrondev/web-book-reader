@@ -3,15 +3,6 @@ use migrations::migrations;
 use tauri::Manager;
 use tauri_plugin_log::{fern::colors::ColoredLevelConfig, Target, TargetKind};
 
-#[cfg(target_os = "macos")]
-#[macro_use]
-extern crate cocoa;
-
-#[cfg(target_os = "macos")]
-#[macro_use]
-extern crate objc;
-
-#[cfg(target_os = "macos")]
 mod mac;
 
 mod migrations;
@@ -48,6 +39,7 @@ pub fn run() {
                 .with_colors(ColoredLevelConfig::default())
                 .build(),
         )
+        .plugin(mac::window::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(
@@ -57,20 +49,6 @@ pub fn run() {
         )
         .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![greet, get_db_path])
-        .setup(|app| {
-            if cfg!(target_os = "macos") {
-                #[cfg(target_os = "macos")]
-                use mac::window::setup_mac_window;
-
-                #[cfg(target_os = "macos")]
-                setup_mac_window(app);
-            }
-
-            // Uncomment to wipe the app on startup.
-            // delete_db(app);
-
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

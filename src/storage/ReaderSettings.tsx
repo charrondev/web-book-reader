@@ -7,7 +7,7 @@ export const DEFAULT_READER_SETTINGS: IReaderSettings = {
     isBold: false,
     lineHeight: 1.5,
     paragraphSpacing: 12,
-    contentPadding: 0,
+    contentPadding: 40,
     isJustified: true,
     isIndented: false,
 };

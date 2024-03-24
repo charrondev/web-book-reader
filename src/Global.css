@@ -82,6 +82,9 @@ h5,
 h6 {
     overflow-wrap: break-word;
 }
+body {
+    background: transparent !important;
+}
 #root,
 #__next {
     isolation: isolate;
@@ -98,7 +101,7 @@ h6 {
 }
 
 :root {
-    --font-family-serif: "Georgia", "Iowan Old Style", "Palatino Linotype",
+    --font-family-serif: -apple-system-ui-serif, ui-serif, "Georgia", "Iowan Old Style", "Palatino Linotype",
         "URW Palladio L", P052, serif;
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, avenir next,
         avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto,

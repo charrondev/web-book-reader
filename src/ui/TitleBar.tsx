@@ -3,18 +3,20 @@
  * @license GPL-3.0-only
  */
 
+import { Link } from "@tanstack/react-router";
 import { motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Colors } from "./Colors";
-import { Placeholder } from "./SkeletonContext";
-import { Link } from "@tanstack/react-router";
 import { IoChevronBack } from "react-icons/io5";
-import { useMediaQuery } from "@uidotdev/usehooks";
+import { Colors } from "./Colors";
 import { ContentContainer } from "./ContentContainer";
+import { useNavBarContext } from "./NavBar.Context";
+import { Placeholder } from "./SkeletonContext";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 type IProps = {
     title: string;
     compact?: boolean;
+    hideHeading?: boolean;
     back?: {
         label: string;
         url: string;
@@ -28,6 +30,8 @@ export function TitleBar(props: IProps) {
         },
     });
     const isMobile = useMediaQuery("(max-width: 768px)");
+
+    const navBarContext = useNavBarContext();
 
     const [isScrolledAway, setIsScrolledAway] = useState(false);
 
@@ -53,16 +57,16 @@ export function TitleBar(props: IProps) {
         hidden: { opacity: 0 },
     };
 
+    const navBarHeight = 50;
+
     return (
         <header data-tauri-drag-region>
             <motion.nav
                 data-tauri-drag-region
                 variants={navVariants}
-                animate={
-                    isScrolledAway || props.compact ? "active" : "inactive"
-                }
+                animate={isScrolledAway ? "active" : "inactive"}
                 css={{
-                    height: 50,
+                    height: navBarHeight,
 
                     position: "fixed",
                     top: 0,
@@ -71,17 +75,18 @@ export function TitleBar(props: IProps) {
                     background: "rgba(255, 255, 255, 1)",
                     backdropFilter: "blur(20px) saturate(180%)",
                     borderBottom: `1px solid ${Colors.Light.slate3}`,
-                    left: isMobile ? 0 : 200,
+                    left: navBarContext.leftInset,
                 }}
             >
                 <ContentContainer
+                    data-tauri-drag-region
                     css={{
-                        paddingLeft: isMobile ? 80 : undefined,
+                        paddingLeft: isMobile ? "80px !important" : undefined,
                         textAlign: "center",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        height: 50,
+                        height: navBarHeight,
                     }}
                 >
                     {props.back && (
@@ -113,6 +118,12 @@ export function TitleBar(props: IProps) {
                             position: "absolute",
                             top: "50%",
                             left: "50%",
+                            maxWidth: "calc(100% - 200px)",
+                            width: "100%",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+
                             opacity: 0,
                             transform: "translate(-50%, -50%)",
                         }}
@@ -121,14 +132,16 @@ export function TitleBar(props: IProps) {
                     </motion.h1>
                 </ContentContainer>
             </motion.nav>
-            <div data-tauri-drag-region css={{ height: 50 }}></div>
+            <div data-tauri-drag-region css={{ height: navBarHeight }}></div>
             <ContentContainer>
                 <h1
-                    data-tauri-drag-region
                     css={{
                         fontWeight: 900,
                         fontSize: 28,
-                        display: props.compact ? "none" : "block",
+                        display:
+                            props.compact || props.hideHeading
+                                ? "none"
+                                : "block",
                         paddingBottom: 16,
                         fontFamily: "var(--font-family-serif)",
                     }}

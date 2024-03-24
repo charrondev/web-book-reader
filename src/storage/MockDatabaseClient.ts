@@ -6,13 +6,13 @@ import {
     DbBookStub,
     DbChapter,
     DbBookProgress,
-    DbReaderSettings,
     QueryBuilderCallback,
     ResolveKnexRowType,
 } from "./DatabaseClient";
 import { Html } from "../Types";
 import { QueryResult } from "@tauri-apps/plugin-sql";
 import { QueryBuilder, Knex } from "knex";
+import type { ReaderSettings } from "../ui/reader/ReaderSettings.types";
 
 const CHAPTER_TEXT: Html = {
     __unsafeHtml: `
@@ -247,7 +247,7 @@ export class MockDatabaseClient implements IDatabaseClient {
         });
     }
     async getReaderSettings(): Promise<
-        DbResult<DbReaderSettings, { message: string }>
+        DbResult<ReaderSettings, { message: string }>
     > {
         return Promise.resolve({
             status: "success",
@@ -255,7 +255,7 @@ export class MockDatabaseClient implements IDatabaseClient {
         });
     }
     async setReaderSettings(
-        settings: DbReaderSettings,
+        settings: ReaderSettings,
     ): Promise<DbResult<null, { message: string }>> {
         return Promise.resolve({
             status: "success",

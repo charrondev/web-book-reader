@@ -1,8 +1,8 @@
 {
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "main-capability",
-    "description": "Capability for the main window",
-    "windows": ["main"],
+    "description": "Capability for the all windows window",
+    "windows": ["*"],
     "permissions": [
         "path:default",
         "event:default",
@@ -21,6 +21,18 @@
         "process:allow-restart",
         "process:allow-exit",
         "log:default",
+        "window:allow-create",
+        "webview:allow-create-webview-window",
+        "webview:allow-set-webview-focus",
+        "webview:allow-set-webview-size",
+        "webview:allow-set-webview-position",
+        "window:allow-title",
+        "window:allow-theme",
+        "window:allow-show",
+        "window:allow-hide",
+        "window:allow-set-effects",
+        "window:allow-set-focus",
+        "window:allow-set-title",
         {
             "identifier": "http:allow-fetch",
             "allow": ["https://www.royalroad.com/*"]

@@ -9,6 +9,19 @@ export interface BookCover {
 
 export type Html = string;
 
+export interface ChapterStub {
+    title: string;
+    datePublished: Date;
+}
+
+export interface Chapter extends ChapterStub {
+    title: string;
+    datePublished: Date;
+    contentHtml: string;
+    noteBefore: Html | null;
+    noteAfter: Html | null;
+}
+
 export interface Book extends BookCover {
     url: string;
     title: string;

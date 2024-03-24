@@ -16,11 +16,13 @@ export function BookGrid(props: IProps) {
         <ContentContainer>
             <div
                 css={{
-                    "--auto-grid-min-size": "120px",
+                    "--auto-grid-min-size": "140px",
                     display: "grid",
                     gridTemplateColumns:
                         "repeat(auto-fill, minmax(var(--auto-grid-min-size), 1fr))",
                     gap: 16,
+                    maxWidth: "100%",
+                    overflow: "hidden",
                 }}
             >
                 {props.books.map((book, i) => {
@@ -42,7 +44,12 @@ export function BookGrid(props: IProps) {
                                 }}
                             >
                                 <Placeholder skeleton={<BookCoverLoader />}>
-                                    <BookCover cover={book} />
+                                    <BookCover
+                                        cover={book}
+                                        css={{
+                                            width: "100%",
+                                        }}
+                                    />
                                 </Placeholder>
 
                                 <div css={{ marginTop: 8, width: "100%" }}>
