@@ -6,10 +6,13 @@
 
 import styled from "@emotion/styled";
 import { Select } from "@radix-ui/themes";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { RoyalRoadApi } from "../discover/RoyalRoadApi";
+import {
+    RoyalRoadApi,
+    type RoyalRoadBookDetails,
+} from "../bookSource/RoyalRoadApi";
 import { BookCover } from "../ui/BookCover";
 import { BookCoverLoader } from "../ui/BookCover.Loader";
 import { Button } from "../ui/Button";
@@ -27,6 +30,8 @@ import { openUrlInWindow } from "../ui/SmartLink";
 import { Tags } from "../ui/Tags";
 import { TitleBar } from "../ui/TitleBar";
 import { spaceshipCompare } from "../utils";
+import { useDatabaseClient } from "../storage/DatabaseClient";
+import { Spinner } from "@radix-ui/themes";
 
 export const Route = createFileRoute("/_layout/discover/royalroad/$")({
     component: () => {
@@ -36,13 +41,31 @@ export const Route = createFileRoute("/_layout/discover/royalroad/$")({
 
 function RoyalRoadDetails() {
     const { _splat } = Route.useParams();
-    const book = useQuery({
+    const dbClient = useDatabaseClient();
+
+    const addBookMutation = useMutation({
+        mutationFn: async (book: RoyalRoadBookDetails) => {
+            await dbClient.addBook({
+                ...book,
+            });
+        },
+        throwOnError: true,
+    });
+
+    const bookQuery = useQuery({
         queryKey: ["rr-fictions", _splat],
         queryFn: async () => {
             const fiction = await RoyalRoadApi.fictionDetails(_splat);
-            return fiction;
+            const dbBook = await dbClient.fetchBookWhere({
+                foreignUrl: fiction.foreignUrl,
+            });
+            return {
+                ...fiction,
+                dbBook,
+            };
         },
     });
+
     const [chapterSort, setChapterSort] = useState<"newest" | "oldest">(
         "newest",
     );
@@ -54,10 +77,12 @@ function RoyalRoadDetails() {
                 paddingBottom: 24,
             }}
         >
-            <SkeletonContext.Provider value={{ isLoading: book.isLoading }}>
+            <SkeletonContext.Provider
+                value={{ isLoading: bookQuery.isLoading }}
+            >
                 <TitleBar
                     hideHeading
-                    title={book.data?.title ?? "Placeholder title"}
+                    title={bookQuery.data?.title ?? "Placeholder title"}
                     back={{
                         url: "/discover",
                         label: "Discover",
@@ -71,8 +96,8 @@ function RoyalRoadDetails() {
                             gap: 24,
                         }}
                     >
-                        {book.data ? (
-                            <BookCover height={220} book={book.data} />
+                        {bookQuery.data ? (
+                            <BookCover height={220} book={bookQuery.data} />
                         ) : (
                             <BookCoverLoader height={220} />
                         )}
@@ -93,14 +118,14 @@ function RoyalRoadDetails() {
                                 }}
                             >
                                 <Placeholder>
-                                    {book.data?.title ??
+                                    {bookQuery.data?.title ??
                                         "Potential Book Title Here"}
                                 </Placeholder>
                             </h1>
 
                             <div css={{ marginTop: 4 }}>
                                 <a
-                                    href={book.data?.authorUrl}
+                                    href={bookQuery.data?.authorUrl}
                                     target="_blank"
                                     css={{
                                         display: "flex",
@@ -123,20 +148,37 @@ function RoyalRoadDetails() {
                                                 width: 24,
                                                 borderRadius: 9,
                                             }}
-                                            src={book.data?.authorAvatarUrl}
+                                            src={
+                                                bookQuery.data?.authorAvatarUrl
+                                            }
                                         ></img>
                                     </Placeholder>
                                     <Placeholder>
-                                        {book.data?.authorName ?? "Author Name"}
+                                        {bookQuery.data?.authorName ??
+                                            "Author Name"}
                                     </Placeholder>
                                 </a>
                             </div>
                             <div
                                 css={{ display: "flex", gap: 6, marginTop: 12 }}
                             >
-                                <Button type="button" primary>
+                                <Button
+                                    type="button"
+                                    primary
+                                    onClick={() => {
+                                        if (bookQuery.data) {
+                                            addBookMutation.mutate(
+                                                bookQuery.data,
+                                            );
+                                        }
+                                    }}
+                                >
                                     {/* TODO: Should show "Read" based on download status */}
-                                    Add to Library
+                                    {addBookMutation.isSuccess ||
+                                    bookQuery.data?.dbBook
+                                        ? "Read"
+                                        : "Add to Library"}
+                                    {addBookMutation.isPending && <Spinner />}
                                 </Button>
                                 <Button type="button">Preview</Button>
                             </div>
@@ -144,23 +186,25 @@ function RoyalRoadDetails() {
                             <DetailRow.Container css={{ marginTop: 18 }}>
                                 <DetailRow.Item
                                     label={"Star Rating"}
-                                    value={book.data?.countStars ?? 5}
+                                    value={bookQuery.data?.countStars ?? 5}
                                 />
                                 <DetailRow.Item
                                     label={"Chapters"}
-                                    value={book.data?.countChapters ?? 142}
+                                    value={bookQuery.data?.countChapters ?? 142}
                                 />
                                 <DetailRow.Item
                                     label={"Pages"}
-                                    value={book.data?.countPages ?? 2424}
+                                    value={bookQuery.data?.countPages ?? 2424}
                                 />
                                 <DetailRow.Item
                                     label={"Readers"}
-                                    value={book.data?.countReaders ?? 42442}
+                                    value={
+                                        bookQuery.data?.countReaders ?? 42442
+                                    }
                                 />
                                 <DetailRow.Item
                                     label={"Views"}
-                                    value={book.data?.countViews ?? 42442}
+                                    value={bookQuery.data?.countViews ?? 42442}
                                 />
                             </DetailRow.Container>
                         </div>
@@ -168,12 +212,12 @@ function RoyalRoadDetails() {
                     <div css={{ marginTop: 24 }}>
                         <Heading>Tags</Heading>
                         <Tags.Cloud css={{ marginTop: 12 }}>
-                            {book?.data?.warningTags?.map((tag, i) => (
+                            {bookQuery?.data?.warningTags?.map((tag, i) => (
                                 <Tags.Item color="ruby" key={`warning${i}`}>
                                     {tag}
                                 </Tags.Item>
                             ))}
-                            {book?.data?.tags?.map((tag, i) => (
+                            {bookQuery?.data?.tags?.map((tag, i) => (
                                 <Tags.Item color="violet" key={`tag${i}`}>
                                     {tag}
                                 </Tags.Item>
@@ -185,9 +229,9 @@ function RoyalRoadDetails() {
                                 countLines: 3,
                                 maxHeight: 200,
                             }}
-                            key={book.isLoading ? "loading" : "loaded"}
+                            key={bookQuery.isLoading ? "loading" : "loaded"}
                             trimEmpty
-                            html={book.data?.descriptionHtml ?? "Loading..."}
+                            html={bookQuery.data?.aboutHtml ?? "Loading..."}
                         />
                         <div
                             css={{
@@ -225,7 +269,7 @@ function RoyalRoadDetails() {
                                 marginTop: 8,
                             }}
                         >
-                            {book.data?.chapters
+                            {bookQuery.data?.chapters
                                 .sort((a, b) => {
                                     if (chapterSort === "oldest") {
                                         return spaceshipCompare(

@@ -267,16 +267,6 @@ export class MockDatabaseClient implements IDatabaseClient {
         return Promise.resolve("/path/to/fake/database.db");
     }
 
-    execute(callback: QueryBuilderCallback<any>): Promise<QueryResult> {
-        throw new Error("Method not implemented.");
-    }
-
-    fetch<T extends object>(
-        callback: QueryBuilderCallback<T>,
-    ): Promise<ResolveKnexRowType<T>> {
-        throw new Error("Method not implemented.");
-    }
-
     public async ensureSetup() {}
 
     public async resetDb() {}

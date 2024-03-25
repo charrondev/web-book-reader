@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleBar } from "../ui/TitleBar";
 import { useQuery } from "@tanstack/react-query";
-import { RoyalRoadApi } from "../discover/RoyalRoadApi";
+import { RoyalRoadApi } from "../bookSource/RoyalRoadApi";
 import { BookGrid } from "../ui/BookGrid";
 import { BookGridLoader } from "../ui/BookGrid.Loader";
 

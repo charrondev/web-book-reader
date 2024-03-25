@@ -56,7 +56,7 @@ export function DebugMenu() {
                                 ?.click();
                         }}
                     >
-                        TanStack Routing
+                        <span>TanStack Routing</span>
                         <IoNavigate />
                     </CustomDropdownItem>
                     <CustomDropdownItem
@@ -71,7 +71,7 @@ export function DebugMenu() {
                             position: "relative",
                         }}
                     >
-                        TanStack State
+                        <span>TanStack State</span>
                         <TiFlowChildren />
                     </CustomDropdownItem>
                     <CustomDropdownItem
@@ -84,7 +84,7 @@ export function DebugMenu() {
                             });
                         }}
                     >
-                        Open Database
+                        <span>Open Database</span>
                         <CgDatabase />
                     </CustomDropdownItem>
                     <CustomDropdownItem
@@ -92,7 +92,7 @@ export function DebugMenu() {
                             db.resetDb();
                         }}
                     >
-                        Reset Database
+                        <span>Reset Database</span>
                         <IoTrashBin />
                     </CustomDropdownItem>
                     <CustomDropdownItem
@@ -100,7 +100,7 @@ export function DebugMenu() {
                             window.location.href = window.location.href;
                         }}
                     >
-                        Refresh Page
+                        <span>Refresh Page</span>
                         <IoRefresh />
                     </CustomDropdownItem>
                 </DropdownMenu.Content>
@@ -127,4 +127,9 @@ export function DebugMenu() {
 
 const CustomDropdownItem = styled(DropdownMenu.Item)({
     gap: 12,
+    width: "100%",
+
+    "& span": {
+        flex: 1,
+    },
 });

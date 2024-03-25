@@ -1,16 +1,17 @@
 import * as cheerio from "cheerio";
 import { Book, type Chapter, type ChapterStub } from "../Types";
 import { fetch } from "@tauri-apps/plugin-http";
+import { NetworkError } from "../Errors";
 
-interface RoyalRoadItem {
+export interface RoyalRoadItem {
     rrSlug: string;
 }
 
-type RoyalRoadBook = Book & RoyalRoadItem;
-type RoyalRoadChapterStub = ChapterStub & RoyalRoadItem;
-type RoyalRoadChapter = Chapter & RoyalRoadItem;
+export type RoyalRoadBook = Book & RoyalRoadItem;
+export type RoyalRoadChapterStub = ChapterStub & RoyalRoadItem;
+export type RoyalRoadChapter = Chapter & RoyalRoadItem;
 
-interface RoyalRoadBookDetails extends RoyalRoadBook {
+export interface RoyalRoadBookDetails extends RoyalRoadBook {
     chapters: RoyalRoadChapterStub[];
     tags: string[];
     warningTags: string[];
@@ -19,7 +20,7 @@ interface RoyalRoadBookDetails extends RoyalRoadBook {
     countPages: number;
     countReaders: number;
     countViews: number;
-    descriptionHtml: string;
+    aboutHtml: string;
     authorName: string;
     authorUrl: string;
     authorAvatarUrl: string;
@@ -27,7 +28,7 @@ interface RoyalRoadBookDetails extends RoyalRoadBook {
 
 const BASE_URL = "https://www.royalroad.com";
 
-const RoyalRoadSort = {
+export const RoyalRoadSort = {
     "best-rated": "Best Rated",
     trending: "Trending",
     new: "Newest",
@@ -51,7 +52,13 @@ export class RoyalRoadApi {
         const url = this.rrUrl(urlable);
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error("Request failed");
+            throw new NetworkError(
+                response.statusText,
+                "GET",
+                url,
+                {},
+                response.status,
+            );
         }
 
         const html = await response.text();
@@ -158,13 +165,14 @@ class RoyalRoadParser {
 
         return {
             url: `/discover/royalroad/${rrUrlPath}`,
-            rrSlug: RoyalRoadApi.rrUrl(rrUrlPath),
+            foreignUrl: RoyalRoadApi.rrUrl(rrUrlPath),
+            rrSlug: RoyalRoadApi.rrSlug(rrUrlPath),
             title,
             coverUrl: coverUrl.startsWith("https://") ? coverUrl : null,
             authorName,
             authorUrl,
             authorAvatarUrl,
-            descriptionHtml: description,
+            aboutHtml: description.trim(),
             tags,
             warningTags,
             countStars: statsByName["overall score"],
@@ -218,7 +226,7 @@ class RoyalRoadParser {
             ),
             title,
             datePublished,
-            contentHtml,
+            content: contentHtml,
             noteBefore,
             noteAfter,
         };
@@ -362,7 +370,10 @@ class RoyalRoadParser {
     private static parseCommon(
         $: cheerio.CheerioAPI,
         el: cheerio.Element,
-    ): Pick<RoyalRoadBook, "title" | "coverUrl" | "tags" | "rrSlug"> {
+    ): Pick<
+        RoyalRoadBook,
+        "title" | "coverUrl" | "tags" | "rrSlug" | "foreignUrl"
+    > {
         const titleEl = $(el).find(".fiction-title").children("a");
 
         const title = $(titleEl).text();
@@ -378,7 +389,8 @@ class RoyalRoadParser {
             tags,
             title,
             coverUrl: coverUrl.startsWith("https://") ? coverUrl : null,
-            rrSlug: rrUrl,
+            rrSlug: RoyalRoadApi.rrSlug(rrUrl),
+            foreignUrl: RoyalRoadApi.rrUrl(rrUrl),
         };
     }
 }

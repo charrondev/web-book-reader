@@ -8,7 +8,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSearchContext } from "../search/Search.Context";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { RoyalRoadApi } from "../discover/RoyalRoadApi";
+import { RoyalRoadApi } from "../bookSource/RoyalRoadApi";
 import { TitleBar } from "../ui/TitleBar";
 import { BookGrid } from "../ui/BookGrid";
 import { BookGridLoader } from "../ui/BookGrid.Loader";

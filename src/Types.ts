@@ -17,13 +17,14 @@ export interface ChapterStub {
 export interface Chapter extends ChapterStub {
     title: string;
     datePublished: Date;
-    contentHtml: string;
+    content: string;
     noteBefore: Html | null;
     noteAfter: Html | null;
 }
 
 export interface Book extends BookCover {
     url: string;
+    foreignUrl: string;
     title: string;
     authorName?: string | null;
     tags: string[];

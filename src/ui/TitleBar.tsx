@@ -37,13 +37,12 @@ export function TitleBar(props: IProps) {
     const navBarContext = useNavBarContext();
 
     let [isScrolledAway, setIsScrolledAway] = useState(false);
-    isScrolledAway = true;
 
-    // useEffect(() => {
-    //     scrollY.on("change", (val) => {
-    //         setIsScrolledAway(val > 20);
-    //     });
-    // });
+    useEffect(() => {
+        scrollY.on("change", (val) => {
+            setIsScrolledAway(val > 20);
+        });
+    });
 
     const navVariants = {
         active: {

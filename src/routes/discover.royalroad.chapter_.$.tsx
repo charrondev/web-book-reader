@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMeasure } from "@uidotdev/usehooks";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { RoyalRoadApi } from "../discover/RoyalRoadApi";
+import { RoyalRoadApi } from "../bookSource/RoyalRoadApi";
 import { DEFAULT_READER_SETTINGS } from "../storage/ReaderSettings";
 import { Colors } from "../ui/Colors";
 import { HtmlContent } from "../ui/HtmlContent";
@@ -67,7 +67,7 @@ function RoyalRoadChapter() {
         targetPageHeight,
         targetPageWidth,
         countColumns,
-        chapterQuery.data?.contentHtml,
+        chapterQuery.data?.content,
     ]);
 
     const [visiblePageGroupIndex, setVisiblePageGroupIndex] = useState(0);
@@ -104,7 +104,7 @@ function RoyalRoadChapter() {
                         <HtmlContent
                             ref={contentRef}
                             html={
-                                chapterQuery.data?.contentHtml ??
+                                chapterQuery.data?.content ??
                                 "<p>Hello world</p>"
                             }
                             rawHtmlPrefix={`

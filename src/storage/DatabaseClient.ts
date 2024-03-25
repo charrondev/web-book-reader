@@ -3,13 +3,14 @@
  * @license GPL-3.0-only
  */
 
-import React, { useContext } from "react";
-import { Author, Book, BookCover, Html } from "../Types";
-import Database, { QueryResult } from "@tauri-apps/plugin-sql";
 import { invoke } from "@tauri-apps/api/core";
+import Database, { QueryResult } from "@tauri-apps/plugin-sql";
 import knex from "knex";
+import React, { useContext } from "react";
 import type { ReaderSettings } from "../reader/ReaderSettings.types";
-import * as shell from "@tauri-apps/plugin-shell";
+import { Book, Html, type Chapter, type ChapterStub } from "../Types";
+import { DbUtils, spaceshipCompare } from "../utils";
+import { DbError } from "../Errors";
 
 export interface DBChapterContents {
     text: Html;
@@ -17,16 +18,17 @@ export interface DBChapterContents {
     noteAfter: Html | null;
 }
 
-export interface DBChapterStub {
+export interface DBChapterStub extends ChapterStub {
     chapterID: string;
     bookID: string;
     title: string;
     datePublished: Date;
+    status: "downloaded" | "pending";
+    dateInserted: Date;
+    dateUpdated: Date;
 }
 
-export interface DbChapter extends DBChapterStub {
-    contents: DBChapterContents;
-}
+export interface DbChapter extends DBChapterStub, Chapter {}
 
 export interface DbBookProgress {
     currentChapter: number;
@@ -41,29 +43,35 @@ export interface DbBookStub extends Book, DbBookProgress {
     dateInserted: Date;
     dateLastRead: Date | null;
     countPages: number;
+    countReaders: number;
+    countStars: number;
 }
 
-export type DbBookRow = Omit<DbBookStub, "tags" | keyof DbBookProgress>;
+type ConvertDatesToStrings<T extends object> = {
+    [K in keyof T]: T[K] extends Date
+        ? string
+        : T[K] extends Date | null
+          ? string | null
+          : T[K];
+};
+
+export type DbBookRow = Omit<
+    ConvertDatesToStrings<DbBookStub>,
+    "tags" | keyof DbBookProgress | "chapters"
+>;
+export type DbTagRow = { bookID: string; tagName: string };
 
 export function isDbBook(book: Book): book is DbBookStub {
     return "bookID" in book;
 }
 
 export interface DbBook extends DbBookStub {
-    countReaders: number;
-    countStars: number;
     chapters: DBChapterStub[];
 }
 
-export type DbResult<TSuccess, TError = { message: string }> =
-    | {
-          status: "success";
-          result: TSuccess;
-      }
-    | {
-          status: "error";
-          error: TError;
-      };
+export interface DbChapterRow extends DbChapter {}
+
+export type DbResult<TSuccess> = TSuccess;
 
 export type QueryBuilderCallback<T> = (
     db: knex.Knex,
@@ -75,26 +83,7 @@ export type ResolveKnexRowType<T> = T extends { _base: infer I }
       ? I[]
       : T;
 
-export interface IDatabaseClient {
-    getBooks(): Promise<DbResult<DbBookStub[]>>;
-    getBookDetails(bookID: string): Promise<DbResult<DbBook>>;
-    getChapters(bookID: string): Promise<DbResult<DbChapter[]>>;
-    setBookProgress(
-        bookID: string,
-        progress: DbBookProgress,
-    ): Promise<DbResult<null>>;
-    getReaderSettings(): Promise<DbResult<ReaderSettings>>;
-    setReaderSettings(settings: ReaderSettings): Promise<DbResult<null>>;
-    getDbPath(): Promise<string>;
-    execute(callback: QueryBuilderCallback<any>): Promise<QueryResult>;
-    fetch<T extends object>(
-        callback: QueryBuilderCallback<T>,
-    ): Promise<ResolveKnexRowType<T>>;
-    ensureSetup(): Promise<void>;
-    resetDb(): Promise<void>;
-}
-
-export class DatabaseClient implements IDatabaseClient {
+export class DatabaseClient {
     #dbInstance: Database | null = null;
 
     public async db() {
@@ -127,17 +116,20 @@ export class DatabaseClient implements IDatabaseClient {
             }),
         ).toSQL();
         const db = await this.db();
-        const result = await db.select<T>(sql.sql, Object.values(sql.bindings));
-        return result as any;
-    }
 
-    public async getBooks(): Promise<
-        DbResult<DbBookStub[], { message: string }>
-    > {
-        const db = await this.db();
-        return db.select(`
-SELECT * FROM WBR_book
-`);
+        try {
+            console.log("Executing db fetch", sql.sql, sql.bindings);
+            let result = (await db.select<T>(
+                sql.sql,
+                Object.values(sql.bindings),
+            )) as any[];
+            console.log("DB fetch results", result);
+            return result as any;
+        } catch (e) {
+            const error = new DbError(e as string, sql.sql, sql.bindings);
+            console.error(error);
+            throw error;
+        }
     }
 
     async execute(
@@ -153,48 +145,162 @@ SELECT * FROM WBR_book
                   ).toSQL()
                 : callback;
         const db = await this.db();
-        const result = await db.execute(
-            sql.sql,
-            Object.values(sql.bindings ?? {}),
-        );
-        return result;
+        try {
+            console.log("Executing query", sql.sql, sql.bindings);
+            const result = await db.execute(
+                sql.sql,
+                Object.values(sql.bindings ?? {}),
+            );
+            console.log("result");
+            return result;
+        } catch (e) {
+            const error = new DbError(e as string, sql.sql, sql.bindings);
+            console.error(error);
+            throw error;
+        }
     }
 
-    public async addDummyBook(): Promise<DbResult<{ bookID: string }>> {
-        const db = await this.db();
-        const result = await db.execute(`
-INSERT INTO WBR_book (title)
-VALUES ('A book title')
-`);
-        return {
-            result: { bookID: result.lastInsertId.toString() },
-            status: "success",
-        };
+    async addBook(
+        dbBook: Omit<
+            DbBook,
+            | "bookID"
+            | keyof DbBookProgress
+            | "dateInserted"
+            | "dateUpdated"
+            | "dateLastChapter"
+            | "dateLastRead"
+            | "dateFirstChapter"
+            | "chapters"
+        > & {
+            chapters: ChapterStub[];
+        },
+    ): Promise<DbBookStub> {
+        const bookID = DbUtils.uuidv4();
+        await this.execute((db) =>
+            db.into("WBR_book").insert({
+                // ...dbBook,
+                bookID,
+                title: dbBook.title,
+                aboutHtml: dbBook.aboutHtml,
+                authorName: dbBook.authorName,
+                coverUrl: dbBook.coverUrl,
+                countChapters: dbBook.countChapters,
+                countPages: dbBook.countPages,
+                url: dbBook.url,
+                foreignUrl: dbBook.foreignUrl,
+
+                dateFirstChapter: dbBook.chapters
+                    .sort((a, b) =>
+                        spaceshipCompare(a.datePublished, b.datePublished),
+                    )[0]
+                    .datePublished.toISOString(),
+                dateLastChapter: dbBook.chapters
+                    .sort((a, b) =>
+                        spaceshipCompare(b.datePublished, a.datePublished),
+                    )[0]
+                    .datePublished.toISOString(),
+                dateInserted: DbUtils.currentDate(),
+                dateLastRead: null,
+                countReaders: dbBook.countReaders,
+                countStars: dbBook.countStars,
+            }),
+        );
+
+        if (dbBook.tags.length > 0) {
+            await this.execute((db) => {
+                const tagRows = dbBook.tags.map((tag) => ({
+                    bookID: bookID,
+                    tagName: tag,
+                }));
+                return db.insert(tagRows).into("WBR_bookTag");
+            });
+        }
+
+        if (dbBook.chapters.length > 0) {
+            await this.execute((db) => {
+                const chapterRows = dbBook.chapters.map((chapter) => ({
+                    bookID,
+                    chapterID: DbUtils.uuidv4(),
+                    title: chapter.title,
+                    datePublished: chapter.datePublished.toISOString(),
+                    status: "pending",
+                    content: "",
+                    dateInserted: DbUtils.currentDate(),
+                    dateUpdated: DbUtils.currentDate(),
+                }));
+                return db.insert(chapterRows).into("WBR_chapter");
+            });
+        }
+
+        // Add the chapter stubs.
+
+        const book = await this.fetchBookWhere({ bookID });
+        if (!book) {
+            throw new Error(`Failed to fetch just-inserted book ${bookID}.`);
+        }
+
+        return book;
     }
-    getBookDetails(
-        bookID: string,
-    ): Promise<DbResult<DbBook, { message: string }>> {
+
+    async fetchBookWhere(
+        where: Partial<DbBookRow>,
+    ): Promise<DbBookStub | null> {
+        const fetchedBooks = await this.fetchBooksWhere(where);
+        return fetchedBooks[0] ?? null;
+    }
+
+    async fetchBooksWhere(where: Partial<DbBookRow>): Promise<DbBookStub[]> {
+        const fetchedBooks = await this.fetch((db) => {
+            let query = db
+                .from("WBR_book")
+                .leftJoin(
+                    "WBR_bookProgress",
+                    "WBR_book.bookID",
+                    "WBR_bookProgress.bookID",
+                );
+
+            for (const [key, value] of Object.entries(where)) {
+                query.where(`WBR_book.${key}`, value);
+            }
+
+            return query;
+        });
+
+        const bookIDs = fetchedBooks.map((book) => book.bookID);
+
+        const fetchedTags = await this.fetch((db) => {
+            const query = db.from("WBR_bookTag").where("bookID", bookIDs);
+            return query;
+        });
+
+        const books: DbBook[] = fetchedBooks.map((row) => {
+            const tags = fetchedTags
+                .filter((tag) => tag.bookID === row.bookID)
+                .map((tag) => tag.tagName);
+            return {
+                ...row,
+                tags,
+            };
+        });
+        return books;
+    }
+
+    getBookDetails(bookID: string): Promise<DbBook> {
         throw new Error("Method not implemented.");
     }
-    getChapters(
-        bookID: string,
-    ): Promise<DbResult<DbChapter[], { message: string }>> {
+    getChapters(bookID: string): Promise<DbChapter[]> {
         throw new Error("Method not implemented.");
     }
     setBookProgress(
         bookID: string,
         progress: DbBookProgress,
-    ): Promise<DbResult<null, { message: string }>> {
+    ): Promise<DbBookProgress> {
         throw new Error("Method not implemented.");
     }
-    getReaderSettings(): Promise<
-        DbResult<ReaderSettings, { message: string }>
-    > {
+    getReaderSettings(): Promise<ReaderSettings> {
         throw new Error("Method not implemented.");
     }
-    setReaderSettings(
-        settings: ReaderSettings,
-    ): Promise<DbResult<null, { message: string }>> {
+    setReaderSettings(settings: ReaderSettings): Promise<ReaderSettings> {
         throw new Error("Method not implemented.");
     }
     async getDbPath(): Promise<string> {
@@ -208,8 +314,8 @@ VALUES ('A book title')
     }
 }
 
-export const DatabaseContext = React.createContext<IDatabaseClient>({} as any);
+export const DatabaseContext = React.createContext<DatabaseClient>({} as any);
 
-export function useDatabaseClient(): IDatabaseClient {
+export function useDatabaseClient(): DatabaseClient {
     return useContext(DatabaseContext);
 }

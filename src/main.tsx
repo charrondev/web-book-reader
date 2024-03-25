@@ -12,12 +12,20 @@ import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { SearchContextProvider } from "./search/Search.Context";
 import { applyHistoryKludge } from "./History";
+import { ErrorView } from "./ui/ErrorHandler";
 
 applyHistoryKludge();
 attachConsole();
 
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({
+    routeTree,
+    defaultErrorComponent: (props) => {
+        const error = props.error;
+
+        return <ErrorView error={error} />;
+    },
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -34,6 +42,10 @@ const queryClient = new QueryClient({
             refetchOnWindowFocus: false,
             refetchOnMount: false,
         },
+        mutations: {
+            retry: false,
+            throwOnError: true,
+        },
     },
 });
 
@@ -42,6 +54,7 @@ const db = new DatabaseClient();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Theme
+            hasBackground={false}
             accentColor={"violet"}
             grayColor="slate"
             radius="medium"
