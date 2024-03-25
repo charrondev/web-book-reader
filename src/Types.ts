@@ -4,7 +4,7 @@ export interface Author {
 }
 
 export interface BookCover {
-    coverUrl: string;
+    coverUrl: string | null;
 }
 
 export type Html = string;
@@ -27,7 +27,7 @@ export interface Book extends BookCover {
     title: string;
     authorName?: string | null;
     tags: string[];
-    dateLastChapter: Date | null;
-    coverUrl: string;
+    dateLastChapter: Date;
+    coverUrl: string | null;
     countChapters: number;
 }

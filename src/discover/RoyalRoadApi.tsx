@@ -58,12 +58,22 @@ export class RoyalRoadApi {
         return html;
     }
 
+    public static async searchFictions(
+        query: string,
+    ): Promise<RoyalRoadBook[]> {
+        const html = await this.getHtml(
+            `/fictions/search?title=${encodeURIComponent(query)}`,
+        );
+        const books = RoyalRoadParser.parseBookList(html);
+        return books;
+    }
+
     public static async listFictions(
         sort: keyof typeof RoyalRoadSort,
     ): Promise<RoyalRoadBook[]> {
         const html = await this.getHtml(`/fictions/${sort}`);
 
-        const books = RoyalRoadParser.parseLatest(html);
+        const books = RoyalRoadParser.parseBookList(html);
         return books;
     }
 
@@ -89,7 +99,7 @@ class RoyalRoadParser {
     ): RoyalRoadBookDetails {
         const $ = cheerio.load(html);
         const title = $("div.fic-title").find("h1").text();
-        const coverUrl = $("div.fic-header").find("img").attr("src")!;
+        const coverUrl = $("div.fic-header").find("img").attr("src") ?? "";
 
         const tags = $(".tags .fiction-tag")
             .map((i, el) => $(el).text())
@@ -150,7 +160,7 @@ class RoyalRoadParser {
             url: `/discover/royalroad/${rrUrlPath}`,
             rrSlug: RoyalRoadApi.rrUrl(rrUrlPath),
             title,
-            coverUrl,
+            coverUrl: coverUrl.startsWith("https://") ? coverUrl : null,
             authorName,
             authorUrl,
             authorAvatarUrl,
@@ -170,13 +180,37 @@ class RoyalRoadParser {
 
     public static parseChapter(html: string): RoyalRoadChapter {
         const $ = cheerio.load(html);
-        const title = $("h1").text();
-        const contentHtml = $(".chapter-content").html() ?? "";
+
+        const title = $(".fic-header h1").text();
         const noteBefore = $(".chapter-note-before").html() ?? null;
         const noteAfter = $(".chapter-note-after").html() ?? null;
         const datePublished = new Date(
             $(".fa-calender[title='Published'] + time").attr("datetime")!,
         );
+
+        const $chapterContent = $(".chapter-content");
+
+        // Try to find the "stolen" warnings from the content.
+        let stolenSelectors: string[] = [];
+        $("style").each((i, el) => {
+            const html = $(el).html();
+            if (!html) {
+                return;
+            }
+
+            stolenSelectors = [
+                ...stolenSelectors,
+                ...parseHiddenCssSelectors(html),
+            ];
+        });
+
+        const combinedStolenSelector = stolenSelectors.join(", ");
+        const stolenWarnings = $chapterContent.find(combinedStolenSelector);
+        if (stolenWarnings.length > 0) {
+            stolenWarnings.remove();
+        }
+
+        const contentHtml = $chapterContent.html() ?? "";
 
         return {
             rrSlug: RoyalRoadApi.rrSlug(
@@ -208,18 +242,16 @@ class RoyalRoadParser {
         );
     }
 
-    public static parseLatest(html: string): RoyalRoadBook[] {
+    public static parseBookList(html: string): RoyalRoadBook[] {
         const $ = cheerio.load(html);
 
         const books: RoyalRoadBook[] = [];
 
-        // Using .each instead of the more concise .map because the typings are
-        // suboptimal. (TODO, maybe)
         $(".fiction-list-item").each((i, el) => {
             const common = RoyalRoadParser.parseCommon($, el);
 
             const dateLastChapter = $(el)
-                .find(".fa-calendar + span > time")
+                .find(".fa-calendar + span > time, .fa-calendar + time")
                 .attr("datetime")!;
             const countChapters = parseInt(
                 $(el)
@@ -330,11 +362,11 @@ class RoyalRoadParser {
     private static parseCommon(
         $: cheerio.CheerioAPI,
         el: cheerio.Element,
-    ): Pick<RoyalRoadBook, "title" | "coverUrl" | "tags" | "rrUrl"> {
+    ): Pick<RoyalRoadBook, "title" | "coverUrl" | "tags" | "rrSlug"> {
         const titleEl = $(el).find(".fiction-title").children("a");
 
         const title = $(titleEl).text();
-        const imageSrc = $(el).find("img").attr("src")!;
+        const coverUrl = $(el).find("img").attr("src") ?? "";
         const rrUrl = $(titleEl).attr("href")!;
 
         const tags = $(el)
@@ -345,8 +377,25 @@ class RoyalRoadParser {
         return {
             tags,
             title,
-            coverUrl: imageSrc,
+            coverUrl: coverUrl.startsWith("https://") ? coverUrl : null,
             rrSlug: rrUrl,
         };
     }
+}
+
+function parseHiddenCssSelectors(css: string): string[] {
+    const ruleMatches = [...css.matchAll(/(\..*)({[^}]*?})/gm)];
+
+    const matchedSelectors = [];
+    for (const match of ruleMatches) {
+        const [rawMatch, selectorName, rule] = match;
+        if (
+            rule.match(/display:(\s*)?none/) ||
+            rule.match(/speak:(\s*)?never/) ||
+            rule.match(/visibility:(\s*)?hidden/)
+        ) {
+            matchedSelectors.push(selectorName);
+        }
+    }
+    return matchedSelectors;
 }

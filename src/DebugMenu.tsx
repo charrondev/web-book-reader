@@ -4,37 +4,50 @@
  * @license gpl-2.0-only
  */
 
-import { DropdownMenu, Button } from "@radix-ui/themes";
+import styled from "@emotion/styled";
+import { Button, DropdownMenu } from "@radix-ui/themes";
+import { useQuery } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { useEffect, useState } from "react";
+import * as shell from "@tauri-apps/plugin-shell";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { CgDatabase } from "react-icons/cg";
+import { IoNavigate, IoRefresh, IoTrashBin } from "react-icons/io5";
+import { TiFlowChildren } from "react-icons/ti";
 import { VscDebugConsole } from "react-icons/vsc";
+import { useDatabaseClient } from "./storage/DatabaseClient";
 
 export function DebugMenu() {
-    const [showDevTools, setShowDevtools] = useState(false);
+    const isMobile = useMediaQuery("(max-width: 768px)");
+    const db = useDatabaseClient();
 
-    useEffect(() => {
-        document.addEventListener("click", (e) => {
-            if (
-                e.target instanceof HTMLElement &&
-                e.target.matches(".tsqd-minimize-btn")
-            ) {
-                setShowDevtools(false);
-            }
-        });
-    }, []);
+    const currentDbPathQuery = useQuery({
+        queryKey: ["db-path"],
+        queryFn: async () => {
+            const path = await db.getDbPath();
+            return { path };
+        },
+    });
+
     return (
-        <div css={{ position: "fixed", top: 9, right: 18, zIndex: 1000 }}>
+        <div css={{}}>
             <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
-                    <Button variant="soft">
+                <DropdownMenu.Trigger
+                    css={{
+                        position: "fixed",
+                        bottom: 10,
+                        right: isMobile ? 18 : 40,
+                        zIndex: 1000000,
+                        background: "white",
+                    }}
+                >
+                    <Button variant="surface">
                         Debug
                         <VscDebugConsole />
                     </Button>
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                    <DropdownMenu.Item
-                        shortcut="⌘ E"
+                <DropdownMenu.Content align="end">
+                    <CustomDropdownItem
                         onClick={() => {
                             document
                                 .querySelector<HTMLDivElement>(
@@ -43,9 +56,10 @@ export function DebugMenu() {
                                 ?.click();
                         }}
                     >
-                        Routing
-                    </DropdownMenu.Item>
-                    <DropdownMenu.Item
+                        TanStack Routing
+                        <IoNavigate />
+                    </CustomDropdownItem>
+                    <CustomDropdownItem
                         onClick={() => {
                             document
                                 .querySelector<HTMLButtonElement>(
@@ -53,13 +67,42 @@ export function DebugMenu() {
                                 )
                                 ?.click();
                         }}
-                        shortcut="⌘ D"
                         css={{
                             position: "relative",
                         }}
                     >
-                        State{" "}
-                    </DropdownMenu.Item>
+                        TanStack State
+                        <TiFlowChildren />
+                    </CustomDropdownItem>
+                    <CustomDropdownItem
+                        onClick={() => {
+                            db.ensureSetup().then(() => {
+                                const path = currentDbPathQuery.data?.path;
+                                if (path) {
+                                    shell.open("file://" + path);
+                                }
+                            });
+                        }}
+                    >
+                        Open Database
+                        <CgDatabase />
+                    </CustomDropdownItem>
+                    <CustomDropdownItem
+                        onClick={() => {
+                            db.resetDb();
+                        }}
+                    >
+                        Reset Database
+                        <IoTrashBin />
+                    </CustomDropdownItem>
+                    <CustomDropdownItem
+                        onClick={() => {
+                            window.location.href = window.location.href;
+                        }}
+                    >
+                        Refresh Page
+                        <IoRefresh />
+                    </CustomDropdownItem>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
             <div
@@ -81,3 +124,7 @@ export function DebugMenu() {
         </div>
     );
 }
+
+const CustomDropdownItem = styled(DropdownMenu.Item)({
+    gap: 12,
+});

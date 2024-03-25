@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as IndexImport } from './routes/index'
+import { Route as LayoutSearchImport } from './routes/_layout.search'
 import { Route as LayoutBooksImport } from './routes/_layout.books'
 import { Route as LayoutDiscoverIndexImport } from './routes/_layout.discover.index'
 import { Route as DiscoverRoyalroadChapterSplatImport } from './routes/discover.royalroad.chapter_.$'
@@ -34,6 +35,11 @@ const LayoutRoute = LayoutImport.update({
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const LayoutSearchRoute = LayoutSearchImport.update({
+  path: '/search',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutBooksRoute = LayoutBooksImport.update({
@@ -78,6 +84,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutBooksImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/search': {
+      preLoaderRoute: typeof LayoutSearchImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/discover/': {
       preLoaderRoute: typeof LayoutDiscoverIndexImport
       parentRoute: typeof LayoutImport
@@ -99,6 +109,7 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LayoutRoute.addChildren([
     LayoutBooksRoute,
+    LayoutSearchRoute,
     LayoutDiscoverIndexRoute,
     LayoutDiscoverRoyalroadSplatRoute,
   ]),

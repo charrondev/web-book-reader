@@ -1,15 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleBar } from "../ui/TitleBar";
-import { useEffect } from "react";
-import {
-    DatabaseClient,
-    DbBookRow,
-    IDatabaseClient,
-    useDatabaseClient,
-} from "../storage/DatabaseClient";
+import { IDatabaseClient, useDatabaseClient } from "../storage/DatabaseClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as shell from "@tauri-apps/plugin-shell";
-import { knex } from "knex";
 import { DbUtils } from "../utils";
 
 export const Route = createFileRoute("/settings")({
@@ -23,13 +16,6 @@ function SettingsPage() {
         queryFn: async () => {
             const path = await db.getDbPath();
             return { path };
-        },
-    });
-
-    const resetDbMutation = useMutation({
-        mutationFn: async () => {
-            await db.resetTables();
-            await testBed(db);
         },
     });
 
@@ -47,32 +33,24 @@ function SettingsPage() {
                 >
                     Open
                 </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        resetDbMutation.mutate();
-                    }}
-                >
-                    Reset
-                </button>
             </div>
         </div>
     );
 }
 
-async function testBed(db: IDatabaseClient) {
-    const insertResult = await db.execute((query) =>
-        query.table("WBR_book").insert({
-            bookID: DbUtils.uuidv4(),
-            dateFirstChapter: null,
-            dateLastChapter: null,
-            dateInserted: DbUtils.currentDate(),
-            dateLastRead: null,
-            countPages: 0,
-            countChapters: 0,
-            coverUrl: "https://example.com",
-            title: "Test Book",
-            aboutHtml: "Test book",
-        }),
-    );
-}
+// async function testBed(db: IDatabaseClient) {
+//     const insertResult = await db.execute((query) =>
+//         query.table("WBR_book").insert({
+//             bookID: DbUtils.uuidv4(),
+//             dateFirstChapter: null,
+//             dateLastChapter: null,
+//             dateInserted: DbUtils.currentDate(),
+//             dateLastRead: null,
+//             countPages: 0,
+//             countChapters: 0,
+//             coverUrl: "https://example.com",
+//             title: "Test Book",
+//             aboutHtml: "Test book",
+//         }),
+//     );
+// }

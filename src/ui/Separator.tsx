@@ -12,6 +12,7 @@ const SeparatorVertical = styled.hr(
         return {
             height: props.height ?? "100%",
             width: 1,
+            minWidth: 1,
         };
     },
 );
@@ -26,6 +27,7 @@ const SeparatorHorizontal = styled.hr(
     (props: { width?: string | number }) => {
         return {
             height: 1,
+            minHeight: 1,
             width: props.width ?? "100%",
         };
     },

@@ -3,7 +3,7 @@
  * @license GPL-3.0-only
  */
 
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
 import { IoChevronBack } from "react-icons/io5";
@@ -12,6 +12,7 @@ import { ContentContainer } from "./ContentContainer";
 import { useNavBarContext } from "./NavBar.Context";
 import { Placeholder } from "./SkeletonContext";
 import { useMediaQuery } from "@uidotdev/usehooks";
+import { useCanGoBack } from "../History";
 
 type IProps = {
     title: string;
@@ -29,17 +30,20 @@ export function TitleBar(props: IProps) {
             current: document.getElementById("root"),
         },
     });
+
+    const canGoBack = useCanGoBack();
     const isMobile = useMediaQuery("(max-width: 768px)");
 
     const navBarContext = useNavBarContext();
 
-    const [isScrolledAway, setIsScrolledAway] = useState(false);
+    let [isScrolledAway, setIsScrolledAway] = useState(false);
+    isScrolledAway = true;
 
-    useEffect(() => {
-        scrollY.on("change", (val) => {
-            setIsScrolledAway(val > 20);
-        });
-    });
+    // useEffect(() => {
+    //     scrollY.on("change", (val) => {
+    //         setIsScrolledAway(val > 20);
+    //     });
+    // });
 
     const navVariants = {
         active: {
@@ -58,6 +62,7 @@ export function TitleBar(props: IProps) {
     };
 
     const navBarHeight = 50;
+    const router = useRouter();
 
     return (
         <header data-tauri-drag-region>
@@ -92,6 +97,12 @@ export function TitleBar(props: IProps) {
                     {props.back && (
                         <Link
                             to={props.back.url}
+                            onClick={(e) => {
+                                if (canGoBack) {
+                                    e.preventDefault();
+                                    router.history.back();
+                                }
+                            }}
                             css={{
                                 display: "flex",
                                 alignItems: "center",

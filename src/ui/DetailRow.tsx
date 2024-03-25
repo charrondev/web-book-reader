@@ -19,6 +19,8 @@ function ContainerImpl(props: IContainerProps) {
                     alignItems: "center",
                     gap: 12,
                     padding: 12,
+                    maxWidth: "100%",
+                    overflowX: "auto",
                 }}
             >
                 {React.Children.map(props.children, (child, i) => {
@@ -81,6 +83,7 @@ function ItemImpl(props: IItemProps) {
                     fontSize: 12,
                     fontWeight: 600,
                     color: Colors.Light.slate10,
+                    whiteSpace: "nowrap",
                 }}
                 htmlFor={id}
             >

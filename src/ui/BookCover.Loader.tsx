@@ -14,6 +14,7 @@ export function BookCoverLoader(props: { height?: number }) {
     return (
         <div
             css={{
+                flexShrink: 0,
                 position: "relative",
                 boxShadow: "var(--shadow-elevation-low)",
                 borderRadius: 6,

@@ -8,7 +8,8 @@ import { Author, Book, BookCover, Html } from "../Types";
 import Database, { QueryResult } from "@tauri-apps/plugin-sql";
 import { invoke } from "@tauri-apps/api/core";
 import knex from "knex";
-import type { ReaderSettings } from "../ui/reader/ReaderSettings.types";
+import type { ReaderSettings } from "../reader/ReaderSettings.types";
+import * as shell from "@tauri-apps/plugin-shell";
 
 export interface DBChapterContents {
     text: Html;
@@ -89,38 +90,31 @@ export interface IDatabaseClient {
     fetch<T extends object>(
         callback: QueryBuilderCallback<T>,
     ): Promise<ResolveKnexRowType<T>>;
-    resetTables(): Promise<void>;
+    ensureSetup(): Promise<void>;
+    resetDb(): Promise<void>;
 }
 
 export class DatabaseClient implements IDatabaseClient {
+    #dbInstance: Database | null = null;
+
     public async db() {
-        return Database.load("sqlite:application.db");
+        if (this.#dbInstance === null) {
+            this.#dbInstance = await Database.load("sqlite:application.db");
+        }
+        return this.#dbInstance;
     }
 
-    public async resetTables() {
-        console.log("resetting tables");
-        const tables = await this.fetch((query) =>
-            query
-                .from("sqlite_schema")
-                .select("name")
-                .where("name", "NOT LIKE", "sqlite_%"),
-        );
-
-        for (const table of tables) {
-            await this.execute({
-                sql: `DROP TABLE IF EXISTS ${table.name}`,
-                bindings: [],
-            });
-        }
-
-        // Reload the DB.
-        const db = await this.db();
-        await db.close();
-        await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
-        });
-        // Reload the db.
+    public async ensureSetup() {
         await this.db();
+    }
+
+    public async resetDb() {
+        console.log("resetting database");
+        (await this.db()).close();
+        await invoke<string>("reset_db");
+        console.log("wiped db");
+        this.#dbInstance = null;
+        // await this.ensureSetup();
     }
 
     async fetch<T extends object>(
@@ -204,7 +198,12 @@ VALUES ('A book title')
         throw new Error("Method not implemented.");
     }
     async getDbPath(): Promise<string> {
-        const path = await invoke<string>("get_db_path");
+        const root = await this.getDbRoot();
+        return root + "/application.db";
+    }
+
+    private async getDbRoot(): Promise<string> {
+        const path = await invoke<string>("get_db_root");
         return JSON.parse(path);
     }
 }

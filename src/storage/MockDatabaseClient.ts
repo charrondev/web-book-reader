@@ -12,7 +12,7 @@ import {
 import { Html } from "../Types";
 import { QueryResult } from "@tauri-apps/plugin-sql";
 import { QueryBuilder, Knex } from "knex";
-import type { ReaderSettings } from "../ui/reader/ReaderSettings.types";
+import type { ReaderSettings } from "../reader/ReaderSettings.types";
 
 const CHAPTER_TEXT: Html = {
     __unsafeHtml: `
@@ -277,5 +277,7 @@ export class MockDatabaseClient implements IDatabaseClient {
         throw new Error("Method not implemented.");
     }
 
-    public async resetTables() {}
+    public async ensureSetup() {}
+
+    public async resetDb() {}
 }

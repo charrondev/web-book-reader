@@ -8,8 +8,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { attachConsole } from "@tauri-apps/plugin-log";
 import { routeTree } from "./routeTree.gen";
 import { DatabaseClient, DatabaseContext } from "./storage/DatabaseClient";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import "@radix-ui/themes/styles.css";
+import { Theme } from "@radix-ui/themes";
+import { SearchContextProvider } from "./search/Search.Context";
+import { applyHistoryKludge } from "./History";
 
+applyHistoryKludge();
 attachConsole();
 
 // Create a new router instance
@@ -37,12 +41,19 @@ const db = new DatabaseClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        {/* <Theme> */}
-        <DatabaseContext.Provider value={db}>
-            <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router} />
-            </QueryClientProvider>
-        </DatabaseContext.Provider>
-        {/* </Theme> */}
+        <Theme
+            accentColor={"violet"}
+            grayColor="slate"
+            radius="medium"
+            scaling="90%"
+        >
+            <SearchContextProvider router={router}>
+                <DatabaseContext.Provider value={db}>
+                    <QueryClientProvider client={queryClient}>
+                        <RouterProvider router={router} />
+                    </QueryClientProvider>
+                </DatabaseContext.Provider>
+            </SearchContextProvider>
+        </Theme>
     </React.StrictMode>,
 );

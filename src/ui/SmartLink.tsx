@@ -55,7 +55,7 @@ export async function openUrlInWindow(
             titleBarStyle: "overlay",
             acceptFirstMouse: true,
             hiddenTitle: true,
-            transparent: true,
+            transparent: false,
             theme: "light",
             height: 600,
             width: 900,

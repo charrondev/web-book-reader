@@ -8,7 +8,7 @@ pub fn migrations() -> Vec<Migration> {
 CREATE TABLE IF NOT EXISTS WBR_book (
     bookID              VARCHAR(50) PRIMARY KEY,
     title               TEXT        NOT NULL,
-    coverUrl            TEXT        NOT NULL,
+    coverUrl            TEXT        NULL,
     authorName          TEXT        NULL,
     dateInserted        DATETIME    DEFAULT CURRENT_TIMESTAMP,
     dateLastChapter     DATETIME    NULL,

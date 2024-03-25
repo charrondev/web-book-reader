@@ -6,8 +6,8 @@ export const READER_SETTINGS_DEFAULTS: ReaderSettings = {
     fontFamily: "Georgia",
     isBold: false,
     lineHeight: 1.35,
-    paragraphSpacing: 8,
+    paragraphSpacing: 12,
     contentPadding: 36,
     isJustified: true,
-    isIndented: true,
+    isIndented: false,
 };

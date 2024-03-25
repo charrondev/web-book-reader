@@ -13,6 +13,7 @@ import {
     IoSettingsOutline,
 } from "react-icons/io5";
 import { Colors } from "./Colors";
+import { useSearchContext } from "../search/Search.Context";
 
 export function DesktopNavBar(props: { className?: string }) {
     return (
@@ -87,6 +88,7 @@ export function DesktopNavBar(props: { className?: string }) {
 }
 
 function SearchBar() {
+    const searchContext = useSearchContext();
     return (
         <div
             css={{
@@ -108,6 +110,10 @@ function SearchBar() {
             <input
                 type="text"
                 autoComplete="off"
+                value={searchContext.query}
+                onChange={(e) => {
+                    searchContext.setQuery(e.target.value);
+                }}
                 css={{
                     width: "100%",
                     background: "rgba(0, 0, 0, 0.08)",

@@ -6,6 +6,8 @@ import { BookCoverLoader } from "./BookCover.Loader";
 import { Colors } from "./Colors";
 import { Placeholder } from "./SkeletonContext";
 import { ContentContainer } from "./ContentContainer";
+import { DateTime } from "./DateTime";
+import { CiCalendarDate } from "react-icons/ci";
 
 interface IProps {
     books: Book[];
@@ -45,7 +47,7 @@ export function BookGrid(props: IProps) {
                             >
                                 <Placeholder skeleton={<BookCoverLoader />}>
                                     <BookCover
-                                        cover={book}
+                                        book={book}
                                         css={{
                                             width: "100%",
                                         }}
@@ -64,17 +66,59 @@ export function BookGrid(props: IProps) {
                                             textDecoration: "none",
                                             color: Colors.Light.slate12,
                                         }}
+                                        title={book.title}
                                     >
                                         <Placeholder>{book.title}</Placeholder>
                                     </div>
                                 </div>
-                                {isDbBook(book) && (
-                                    <BookProgress
-                                        css={{ marginTop: 2 }}
-                                        total={book.countPages}
-                                        completed={book.currentPage}
+                                <div
+                                    css={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 4,
+                                        marginTop: -2,
+                                        width: "100%",
+                                    }}
+                                >
+                                    <CiCalendarDate
+                                        css={{
+                                            position: "relative",
+                                            top: -1,
+                                            color: Colors.Light.slate11,
+                                            fontSize: 16,
+                                        }}
                                     />
-                                )}
+                                    <Placeholder>
+                                        <DateTime
+                                            css={{
+                                                color: Colors.Light.slate11,
+                                                fontSize: 12,
+                                            }}
+                                            date={book.dateLastChapter}
+                                        />
+                                    </Placeholder>
+                                    {isDbBook(book) && (
+                                        <>
+                                            <span css={{ flex: 1 }}></span>
+                                            <Placeholder>
+                                                <span
+                                                    css={{
+                                                        color: Colors.Light
+                                                            .slate11,
+                                                        fontSize: 12,
+                                                        fontWeight: "bold",
+                                                    }}
+                                                >
+                                                    {progressPercent(
+                                                        book.countPages,
+                                                        book.currentPage,
+                                                    )}
+                                                    %
+                                                </span>
+                                            </Placeholder>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </Link>
                     );
@@ -84,17 +128,19 @@ export function BookGrid(props: IProps) {
     );
 }
 
+function progressPercent(total: number, completed: number): number {
+    return Math.min(
+        Math.round((Math.max(completed, 0) / Math.max(total, 1)) * 100),
+        100,
+    );
+}
+
 function BookProgress(props: {
     total: number;
     completed: number;
     className?: string;
 }) {
-    const percent = Math.min(
-        Math.round(
-            (Math.max(props.completed, 0) / Math.max(props.total, 1)) * 100,
-        ),
-        100,
-    );
+    const percent = progressPercent(props.total, props.completed);
     return (
         <div
             css={[

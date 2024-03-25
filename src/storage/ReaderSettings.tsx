@@ -1,6 +1,6 @@
-import { IReaderSettings } from "./DatabaseClient";
+import type { ReaderSettings } from "../reader/ReaderSettings.types";
 
-export const DEFAULT_READER_SETTINGS: IReaderSettings = {
+export const DEFAULT_READER_SETTINGS: ReaderSettings = {
     fontSize: 18,
     headingFontSize: 32,
     fontFamily: "Georgia",

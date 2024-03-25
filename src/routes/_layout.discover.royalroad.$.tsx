@@ -1,24 +1,32 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { TitleBar } from "../ui/TitleBar";
+/**
+ * @author Adam Charron <adam.c@vanillaforums.com>
+ * @copyright 2009-2024 Vanilla Forums Inc.
+ * @license gpl-2.0-only
+ */
+
+import styled from "@emotion/styled";
+import { Select } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
 import { RoyalRoadApi } from "../discover/RoyalRoadApi";
+import { BookCover } from "../ui/BookCover";
+import { BookCoverLoader } from "../ui/BookCover.Loader";
+import { Button } from "../ui/Button";
+import { Colors } from "../ui/Colors";
+import { ContentContainer } from "../ui/ContentContainer";
+import { DateTime } from "../ui/DateTime";
+import { DetailRow } from "../ui/DetailRow";
+import { HtmlContent } from "../ui/HtmlContent";
 import {
     CirclePlaceholder,
     Placeholder,
     SkeletonContext,
 } from "../ui/SkeletonContext";
-import { BookCover } from "../ui/BookCover";
-import { BookCoverLoader } from "../ui/BookCover.Loader";
-import { ContentContainer } from "../ui/ContentContainer";
-import { HtmlContent } from "../ui/HtmlContent";
-import { DetailRow } from "../ui/DetailRow";
-import { Skeleton } from "@radix-ui/themes";
-import { Tags } from "../ui/Tags";
-import { Colors } from "../ui/Colors";
-import { Button } from "../ui/Button";
-import styled from "@emotion/styled";
-import { DateTime } from "../ui/DateTime";
 import { openUrlInWindow } from "../ui/SmartLink";
+import { Tags } from "../ui/Tags";
+import { TitleBar } from "../ui/TitleBar";
+import { spaceshipCompare } from "../utils";
 
 export const Route = createFileRoute("/_layout/discover/royalroad/$")({
     component: () => {
@@ -27,7 +35,6 @@ export const Route = createFileRoute("/_layout/discover/royalroad/$")({
 });
 
 function RoyalRoadDetails() {
-    const router = useRouter();
     const { _splat } = Route.useParams();
     const book = useQuery({
         queryKey: ["rr-fictions", _splat],
@@ -36,6 +43,9 @@ function RoyalRoadDetails() {
             return fiction;
         },
     });
+    const [chapterSort, setChapterSort] = useState<"newest" | "oldest">(
+        "newest",
+    );
 
     return (
         <div
@@ -62,7 +72,7 @@ function RoyalRoadDetails() {
                         }}
                     >
                         {book.data ? (
-                            <BookCover height={220} cover={book.data} />
+                            <BookCover height={220} book={book.data} />
                         ) : (
                             <BookCoverLoader height={220} />
                         )}
@@ -73,6 +83,7 @@ function RoyalRoadDetails() {
                                 height: 220,
                                 display: "flex",
                                 flexDirection: "column",
+                                minWidth: 0,
                             }}
                         >
                             <h1
@@ -169,14 +180,41 @@ function RoyalRoadDetails() {
                             ))}
                         </Tags.Cloud>
                         <Heading>Description</Heading>
-                        <Skeleton>
-                            <HtmlContent
-                                html={
-                                    book.data?.descriptionHtml ?? "Loading..."
+                        <HtmlContent
+                            collapse={{
+                                countLines: 3,
+                                maxHeight: 200,
+                            }}
+                            key={book.isLoading ? "loading" : "loaded"}
+                            trimEmpty
+                            html={book.data?.descriptionHtml ?? "Loading..."}
+                        />
+                        <div
+                            css={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-end",
+                            }}
+                        >
+                            <Heading>Chapters</Heading>
+                            <Select.Root
+                                defaultValue="newest"
+                                value={chapterSort}
+                                onValueChange={(newVal) =>
+                                    setChapterSort(newVal as any)
                                 }
-                            />
-                        </Skeleton>
-                        <Heading>Chapters</Heading>
+                            >
+                                <Select.Trigger variant="ghost" />
+                                <Select.Content variant="soft">
+                                    <Select.Item value="newest">
+                                        Newest
+                                    </Select.Item>
+                                    <Select.Item value="oldest">
+                                        Oldest
+                                    </Select.Item>
+                                </Select.Content>
+                            </Select.Root>
+                        </div>
                         <div
                             css={{
                                 display: "flex",
@@ -187,57 +225,73 @@ function RoyalRoadDetails() {
                                 marginTop: 8,
                             }}
                         >
-                            {book.data?.chapters.map((chapter, i) => {
-                                return (
-                                    <div
-                                        key={i}
-                                        css={{
-                                            padding: "8px",
-                                            // background: Colors.Light.slate4,
-                                            // borderRadius: 6,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            gap: 24,
-                                            borderBottom: `1px solid ${Colors.Light.slate4}`,
-                                        }}
-                                    >
-                                        <div>
-                                            <h3
-                                                css={{
-                                                    fontSize: 14,
-                                                    marginBottom: 4,
-                                                    lineHeight: 1,
-                                                }}
-                                            >
-                                                {chapter.title}
-                                            </h3>
-                                            <div
-                                                css={{
-                                                    lineHeight: 1,
-                                                    fontSize: 12,
-                                                    color: Colors.Light.slate10,
-                                                }}
-                                            >
-                                                <DateTime
-                                                    date={chapter.datePublished}
-                                                />
-                                            </div>
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            onClick={() => {
-                                                openUrlInWindow(
-                                                    "/discover/royalroad/chapter/" +
-                                                        chapter.rrSlug,
-                                                );
+                            {book.data?.chapters
+                                .sort((a, b) => {
+                                    if (chapterSort === "oldest") {
+                                        return spaceshipCompare(
+                                            a.datePublished,
+                                            b.datePublished,
+                                        );
+                                    } else {
+                                        return spaceshipCompare(
+                                            b.datePublished,
+                                            a.datePublished,
+                                        );
+                                    }
+                                })
+                                .map((chapter, i) => {
+                                    return (
+                                        <div
+                                            key={i}
+                                            css={{
+                                                padding: "8px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                gap: 24,
+                                                borderBottom: `1px solid ${Colors.Light.slate4}`,
                                             }}
                                         >
-                                            Preview
-                                        </Button>
-                                    </div>
-                                );
-                            })}
+                                            <div>
+                                                <h3
+                                                    css={{
+                                                        fontSize: 14,
+                                                        marginBottom: 4,
+                                                        lineHeight: 1,
+                                                        fontWeight: 500,
+                                                    }}
+                                                >
+                                                    {chapter.title}
+                                                </h3>
+                                                <div
+                                                    css={{
+                                                        lineHeight: 1,
+                                                        fontSize: 12,
+                                                        color: Colors.Light
+                                                            .slate10,
+                                                    }}
+                                                >
+                                                    <DateTime
+                                                        date={
+                                                            chapter.datePublished
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                onClick={() => {
+                                                    openUrlInWindow(
+                                                        "/discover/royalroad/chapter/" +
+                                                            chapter.rrSlug,
+                                                    );
+                                                }}
+                                            >
+                                                Preview
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
                         </div>
                     </div>
                 </ContentContainer>
