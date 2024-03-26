@@ -1,5 +1,4 @@
 /**
- * @author Adam Charron <adam.c@vanillaforums.com>
- * @copyright 2009-2024 Vanilla Forums Inc.
- * @license gpl-2.0-only
+ * @copyright 2024 Adam (charrondev) Charron
+ * @license AGPL-3.0-only
  */

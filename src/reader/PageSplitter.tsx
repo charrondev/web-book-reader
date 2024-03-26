@@ -1,7 +1,6 @@
 /**
- * @author Adam Charron <adam.c@vanillaforums.com>
- * @copyright 2009-2024 Vanilla Forums Inc.
- * @license gpl-2.0-only
+ * @copyright 2024 Adam (charrondev) Charron
+ * @license AGPL-3.0-only
  */
 
 import { Offscreen } from "../ui/Offscreen";
@@ -80,6 +79,9 @@ export class PageSplitter {
         return pageGroups;
     }
 
+    /**
+     * Calculate the pages based on the root element group them into groups of `groupSize`.
+     */
     private calculatePages(): HTMLElement[] {
         if (this.shouldDebug) {
             console.clear();
@@ -135,12 +137,21 @@ export class PageSplitter {
         return this.pages;
     }
 
+    /**
+     * Useful for debugging. Enables a bunch of console log statements and limits the pages calculated to the given range.
+     *
+     * @param pageStart
+     * @param pageEnd
+     */
     public enableDebug(pageStart: number = 1, pageEnd: number = 5) {
         this.shouldDebug = true;
         this.debugPageStart = pageStart;
         this.debugPageEnd = pageEnd;
     }
 
+    /**
+     * Finish the current page and start a new one.
+     */
     private finishCurrentPage() {
         this.pages.push(this.currentPage);
         this.currentPage = this.nextPage;
@@ -150,6 +161,10 @@ export class PageSplitter {
         this.debugLog("start page", this.currentPageNumber);
     }
 
+    /**
+     * Log something if we are in debug mode.
+     * @param args
+     */
     private debugLog(...args: any) {
         if (!this.shouldDebug) {
             return;
@@ -165,6 +180,12 @@ export class PageSplitter {
         console.log(...args);
     }
 
+    /**
+     * Check if our current page overflowed it's container.
+     *
+     * @param contextNode Log this HTML node if we overflowed.
+     * @param context Log this string if we overflowed.
+     */
     private didCurrentPageOverflow(
         contextNode: Node,
         context?: string,
@@ -181,6 +202,10 @@ export class PageSplitter {
         return didOverflow;
     }
 
+    /**
+     * Create a new page from our template. Append it to the scratch element.
+     * @returns The element.
+     */
     private createPage(): HTMLElement {
         const cloned = this.rootElement.cloneNode(false) as HTMLElement;
         cloned.style.width = `${this.targetDimensions.width}px`;
@@ -195,8 +220,10 @@ export class PageSplitter {
     /**
      * Given an HTML Node, traverse it recursively and split it into two elements while preserving all HTML structure
      *
+     * @param node The element to split.
+     * @param currentTarget The area we want to append the element to.
+     * @param overflowTarget The area to append any parts of the element that didn't fit.
      *
-     * @param node
      * @returns Whether we overflowed or not.
      */
     private splitNode(
@@ -217,8 +244,10 @@ export class PageSplitter {
     /**
      * Given an HTML Element, traverse it's children and split it into two elements while preserving all HTML structure
      *
+     * @param element The element to split.
+     * @param currentTarget The area we want to append the element to.
+     * @param overflowTarget The area to append any parts of the element that didn't fit.
      *
-     * @param element
      * @returns Whether we overflowed or not.
      */
     private splitElement(
@@ -283,10 +312,12 @@ export class PageSplitter {
     }
 
     /**
-     * Given an HTML Element, traverse it's children and split it into two elements while preserving all HTML structure
+     * Given an HTML Text, traverse it's children and split it into two elements while preserving all HTML structure
      *
+     * @param text The HTML Text to split.
+     * @param currentTarget The area we want to append the element to.
+     * @param overflowTarget The area to append any parts of the element that didn't fit.
      *
-     * @param element
      * @return If we overflowed or not.
      */
     private splitText(
@@ -329,6 +360,11 @@ export class PageSplitter {
         return didOverflow;
     }
 
+    /**
+     * Join together all adjacent text nodes.
+     *
+     * @param element The element to walk.
+     */
     private condenseTextNodes(element: Element) {
         for (const child of Array.from(element.childNodes)) {
             if (child instanceof Text) {

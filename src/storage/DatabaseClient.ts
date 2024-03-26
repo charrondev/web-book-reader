@@ -1,6 +1,6 @@
 /**
  * @copyright 2024 Adam (charrondev) Charron
- * @license GPL-3.0-only
+ * @license AGPL-3.0-only
  */
 
 import { invoke } from "@tauri-apps/api/core";
