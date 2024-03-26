@@ -49,7 +49,6 @@ function RoyalRoadDetails() {
                 ...book,
             });
         },
-        throwOnError: true,
     });
 
     const bookQuery = useQuery({

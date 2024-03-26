@@ -124,7 +124,7 @@ export function TitleBar(props: IProps) {
                                 : "hidden"
                         }
                         css={{
-                            fontSize: 14,
+                            fontSize: props.compact ? 12 : 14,
                             position: "absolute",
                             top: "50%",
                             left: "50%",
@@ -133,6 +133,7 @@ export function TitleBar(props: IProps) {
                             whiteSpace: "nowrap",
                             textOverflow: "ellipsis",
                             overflow: "hidden",
+                            color: Colors.Light.slate12,
 
                             opacity: 0,
                             transform: "translate(-50%, -50%)",

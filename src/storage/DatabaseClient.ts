@@ -6,7 +6,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import Database, { QueryResult } from "@tauri-apps/plugin-sql";
 import knex from "knex";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import type { ReaderSettings } from "../reader/ReaderSettings.types";
 import { Book, Html, type Chapter, type ChapterStub } from "../Types";
 import { DbUtils, spaceshipCompare } from "../utils";
@@ -23,7 +23,7 @@ export interface DBChapterStub extends ChapterStub {
     bookID: string;
     title: string;
     datePublished: Date;
-    status: "downloaded" | "pending";
+    status: "downloaded" | "pending" | "error";
     dateInserted: Date;
     dateUpdated: Date;
 }
@@ -36,40 +36,34 @@ export interface DbBookProgress {
     currentOffset: number;
 }
 
-export interface DbBookStub extends Book, DbBookProgress {
+export interface DbBook extends Book, DbBookProgress {
     bookID: string;
-    aboutHtml: Html;
     dateFirstChapter: Date | null;
     dateInserted: Date;
     dateLastRead: Date | null;
-    countPages: number;
-    countReaders: number;
-    countStars: number;
 }
 
-type ConvertDatesToStrings<T extends object> = {
-    [K in keyof T]: T[K] extends Date
-        ? string
-        : T[K] extends Date | null
-          ? string | null
-          : T[K];
-};
-
-export type DbBookRow = Omit<
-    ConvertDatesToStrings<DbBookStub>,
-    "tags" | keyof DbBookProgress | "chapters"
->;
+export type DbBookRow = Omit<DbBook, "tags" | keyof DbBookProgress | "url">;
+export interface DbChapterRow extends DbChapter {}
 export type DbTagRow = { bookID: string; tagName: string };
 
-export function isDbBook(book: Book): book is DbBookStub {
+export function isDbBook(book: Book): book is DbBook {
     return "bookID" in book;
 }
 
-export interface DbBook extends DbBookStub {
-    chapters: DBChapterStub[];
-}
-
-export interface DbChapterRow extends DbChapter {}
+export type DbBookInsert = Omit<
+    DbBookRow,
+    | "bookID"
+    | "dateInserted"
+    | "dateUpdated"
+    | "dateLastChapter"
+    | "dateLastRead"
+    | "dateFirstChapter"
+    | "countChapters"
+> & {
+    chapters: ChapterStub[];
+    tags: string[];
+};
 
 export type DbResult<TSuccess> = TSuccess;
 
@@ -86,6 +80,9 @@ export type ResolveKnexRowType<T> = T extends { _base: infer I }
 export class DatabaseClient {
     #dbInstance: Database | null = null;
 
+    ///
+    /// Basic utilities
+    ///
     public async db() {
         if (this.#dbInstance === null) {
             this.#dbInstance = await Database.load("sqlite:application.db");
@@ -160,76 +157,35 @@ export class DatabaseClient {
         }
     }
 
-    async addBook(
-        dbBook: Omit<
-            DbBook,
-            | "bookID"
-            | keyof DbBookProgress
-            | "dateInserted"
-            | "dateUpdated"
-            | "dateLastChapter"
-            | "dateLastRead"
-            | "dateFirstChapter"
-            | "chapters"
-        > & {
-            chapters: ChapterStub[];
-        },
-    ): Promise<DbBookStub> {
+    ///
+    /// Downloading Books
+    ///
+
+    async addBook(dbBook: DbBookInsert): Promise<DbBook> {
         const bookID = DbUtils.uuidv4();
         await this.execute((db) =>
             db.into("WBR_book").insert({
-                // ...dbBook,
                 bookID,
                 title: dbBook.title,
-                aboutHtml: dbBook.aboutHtml,
                 authorName: dbBook.authorName,
                 coverUrl: dbBook.coverUrl,
-                countChapters: dbBook.countChapters,
-                countPages: dbBook.countPages,
-                url: dbBook.url,
+                countChapters: dbBook.chapters.length,
                 foreignUrl: dbBook.foreignUrl,
-
-                dateFirstChapter: dbBook.chapters
-                    .sort((a, b) =>
-                        spaceshipCompare(a.datePublished, b.datePublished),
-                    )[0]
-                    .datePublished.toISOString(),
-                dateLastChapter: dbBook.chapters
-                    .sort((a, b) =>
-                        spaceshipCompare(b.datePublished, a.datePublished),
-                    )[0]
-                    .datePublished.toISOString(),
+                dateFirstChapter: dbBook.chapters.sort((a, b) =>
+                    spaceshipCompare(a.datePublished, b.datePublished),
+                )[0].datePublished,
+                dateLastChapter: dbBook.chapters.sort((a, b) =>
+                    spaceshipCompare(b.datePublished, a.datePublished),
+                )[0].datePublished,
                 dateInserted: DbUtils.currentDate(),
                 dateLastRead: null,
-                countReaders: dbBook.countReaders,
-                countStars: dbBook.countStars,
             }),
         );
 
-        if (dbBook.tags.length > 0) {
-            await this.execute((db) => {
-                const tagRows = dbBook.tags.map((tag) => ({
-                    bookID: bookID,
-                    tagName: tag,
-                }));
-                return db.insert(tagRows).into("WBR_bookTag");
-            });
-        }
+        await this.putBookTags(bookID, dbBook.tags);
 
         if (dbBook.chapters.length > 0) {
-            await this.execute((db) => {
-                const chapterRows = dbBook.chapters.map((chapter) => ({
-                    bookID,
-                    chapterID: DbUtils.uuidv4(),
-                    title: chapter.title,
-                    datePublished: chapter.datePublished.toISOString(),
-                    status: "pending",
-                    content: "",
-                    dateInserted: DbUtils.currentDate(),
-                    dateUpdated: DbUtils.currentDate(),
-                }));
-                return db.insert(chapterRows).into("WBR_chapter");
-            });
+            await this.insertBookChapters(bookID, dbBook.chapters);
         }
 
         // Add the chapter stubs.
@@ -239,39 +195,161 @@ export class DatabaseClient {
             throw new Error(`Failed to fetch just-inserted book ${bookID}.`);
         }
 
+        fireOnBookAdded();
+
         return book;
     }
 
-    async fetchBookWhere(
-        where: Partial<DbBookRow>,
-    ): Promise<DbBookStub | null> {
+    private async putBookTags(bookID: string, tags: string[]) {
+        await this.execute((db) => {
+            return db.delete().from("WBR_bookTag").where("bookID", bookID);
+        });
+        const tagRows = tags.map((tag) => ({
+            bookID: bookID,
+            tagName: tag,
+        }));
+        await this.execute((db) =>
+            db.insert(tagRows).into("WBR_bookTag").onConflict().ignore(),
+        );
+    }
+
+    private async insertBookChapters(bookID: string, chapters: ChapterStub[]) {
+        await this.execute((db) => {
+            const chapterRows = chapters.map((chapter) => ({
+                bookID,
+                chapterID: DbUtils.uuidv4(),
+                foreignUrl: chapter.foreignUrl,
+                title: chapter.title,
+                datePublished: chapter.datePublished.toISOString(),
+                status: "pending",
+                content: "",
+                dateInserted: DbUtils.currentDate(),
+                dateUpdated: DbUtils.currentDate(),
+            }));
+            return db
+                .insert(chapterRows)
+                .into("WBR_chapter")
+                .onConflict()
+                .ignore();
+        });
+    }
+
+    public async updateBook(
+        bookID: string,
+        update: Partial<DbBookInsert>,
+    ): Promise<void> {
+        await this.execute((db) =>
+            db
+                .from("WBR_book")
+                .where("bookID", bookID)
+                .update({
+                    title: update.title,
+                    authorName: update.authorName,
+                    coverUrl: update.coverUrl,
+                    countChapters: update.chapters?.length,
+                    url: update.url,
+                    foreignUrl: update.foreignUrl,
+                    dateFirstChapter: update.chapters?.sort((a, b) =>
+                        spaceshipCompare(a.datePublished, b.datePublished),
+                    )?.[0]?.datePublished,
+                    dateLastChapter: update.chapters?.sort((a, b) =>
+                        spaceshipCompare(b.datePublished, a.datePublished),
+                    )?.[0]?.datePublished,
+                }),
+        );
+        if (update.tags) {
+            await this.putBookTags(bookID, update.tags);
+        }
+        if (update.chapters) {
+            await this.insertBookChapters(bookID, update.chapters);
+        }
+    }
+
+    public async updateChapter(
+        chapterID: string,
+        chapter: Partial<
+            Omit<DbChapter, "dateInserted" | "dateUpdated" | "chapterID">
+        >,
+    ) {
+        await this.execute((db) =>
+            db.from("WBR_chapter").where("chapterID", chapterID).update({
+                content: chapter.content,
+                status: chapter.status,
+                title: chapter.title,
+                datePublished: chapter.datePublished,
+                dateUpdated: DbUtils.currentDate(),
+            }),
+        );
+    }
+
+    public async getChaptersWhere(
+        where: Partial<DbChapter>,
+    ): Promise<DbChapter[]> {
+        const fetchedChapters = await this.fetch((db) => {
+            let query = db.from("WBR_chapter");
+
+            for (const [key, value] of Object.entries(where)) {
+                query.where(key, value);
+            }
+
+            query.orderBy([
+                { column: "bookID", order: "asc" },
+                { column: "datePublished", order: "asc" },
+            ]);
+
+            return query;
+        });
+
+        return fetchedChapters;
+    }
+
+    ///
+    /// Reading and displaying books.
+    ///
+
+    async fetchBookWhere(where: Partial<DbBookRow>): Promise<DbBook | null> {
         const fetchedBooks = await this.fetchBooksWhere(where);
         return fetchedBooks[0] ?? null;
     }
 
-    async fetchBooksWhere(where: Partial<DbBookRow>): Promise<DbBookStub[]> {
-        const fetchedBooks = await this.fetch((db) => {
-            let query = db
-                .from("WBR_book")
-                .leftJoin(
-                    "WBR_bookProgress",
-                    "WBR_book.bookID",
-                    "WBR_bookProgress.bookID",
-                );
+    async fetchBooksWhere(where: Partial<DbBookRow>): Promise<DbBook[]> {
+        const fetchedBooks: Array<DbBookRow & DbBookProgress> =
+            await this.fetch((db) => {
+                let query = db
+                    .from("WBR_book")
+                    .leftJoin(
+                        "WBR_bookProgress",
+                        "WBR_book.bookID",
+                        "WBR_bookProgress.bookID",
+                    );
 
-            for (const [key, value] of Object.entries(where)) {
-                query.where(`WBR_book.${key}`, value);
-            }
+                for (const [key, value] of Object.entries(where)) {
+                    query.where(`WBR_book.${key}`, value);
+                }
 
-            return query;
-        });
+                return query;
+            });
 
         const bookIDs = fetchedBooks.map((book) => book.bookID);
 
-        const fetchedTags = await this.fetch((db) => {
-            const query = db.from("WBR_bookTag").where("bookID", bookIDs);
-            return query;
-        });
+        const [fetchedTags, fetchedPendingCounts] = await Promise.all([
+            this.fetch((db) => {
+                const query = db.from("WBR_bookTag").where("bookID", bookIDs);
+                return query;
+            }),
+            this.fetch((db) =>
+                db
+                    .from<{
+                        bookID: string;
+                        countPending: number;
+                    }>("WBR_chapter")
+                    .select("bookID")
+                    .count({ countPending: "chapterID" })
+                    .where("bookID", bookIDs)
+                    .where("status", "pending")
+                    .groupBy("bookID"),
+            ),
+        ]);
 
         const books: DbBook[] = fetchedBooks.map((row) => {
             const tags = fetchedTags
@@ -279,9 +357,11 @@ export class DatabaseClient {
                 .map((tag) => tag.tagName);
             return {
                 ...row,
+                url: `/books/${row.bookID}`,
                 tags,
-            };
+            } as DbBook;
         });
+
         return books;
     }
 
@@ -318,4 +398,21 @@ export const DatabaseContext = React.createContext<DatabaseClient>({} as any);
 
 export function useDatabaseClient(): DatabaseClient {
     return useContext(DatabaseContext);
+}
+
+function fireOnBookAdded() {
+    document.dispatchEvent(
+        new CustomEvent("x-book-added", {
+            bubbles: false,
+        }),
+    );
+}
+
+function useOnBookAdded(handler: () => void) {
+    useEffect(() => {
+        document.addEventListener("x-book-added", handler);
+        return () => {
+            document.removeEventListener("x-book-added", handler);
+        };
+    });
 }

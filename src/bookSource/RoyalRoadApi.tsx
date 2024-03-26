@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import { Book, type Chapter, type ChapterStub } from "../Types";
 import { fetch } from "@tauri-apps/plugin-http";
 import { NetworkError } from "../Errors";
+import { RateLimiter } from "./RateLimiter";
 
 export interface RoyalRoadItem {
     rrSlug: string;
@@ -26,8 +27,6 @@ export interface RoyalRoadBookDetails extends RoyalRoadBook {
     authorAvatarUrl: string;
 }
 
-const BASE_URL = "https://www.royalroad.com";
-
 export const RoyalRoadSort = {
     "best-rated": "Best Rated",
     trending: "Trending",
@@ -37,18 +36,23 @@ export const RoyalRoadSort = {
 type UrlAble = RoyalRoadItem | string;
 
 export class RoyalRoadApi {
+    public static readonly BASE_URL = "https://www.royalroad.com";
+
+    public static rateLimiter = new RateLimiter(300);
+
     public static rrSlug(urlable: UrlAble): string {
         const urlPiece = typeof urlable === "string" ? urlable : urlable.rrSlug;
-        const urlPath = urlPiece.replace(BASE_URL, "").replace(/^\//, "");
+        const urlPath = urlPiece.replace(this.BASE_URL, "").replace(/^\//, "");
         return urlPath;
     }
 
     public static rrUrl(urlable: UrlAble): string {
         const urlPath = this.rrSlug(urlable);
-        return [BASE_URL, urlPath].map((piece) => piece.trim()).join("/");
+        return [this.BASE_URL, urlPath].map((piece) => piece.trim()).join("/");
     }
 
     public static async getHtml(urlable: UrlAble): Promise<string> {
+        await this.rateLimiter.wait();
         const url = this.rrUrl(urlable);
         const response = await fetch(url);
         if (!response.ok) {
@@ -220,10 +224,10 @@ class RoyalRoadParser {
 
         const contentHtml = $chapterContent.html() ?? "";
 
+        const href = $("link[rel='canonical']").attr("href")!;
         return {
-            rrSlug: RoyalRoadApi.rrSlug(
-                $("link[rel='canonical']").attr("href")!,
-            ),
+            rrSlug: RoyalRoadApi.rrSlug(href),
+            foreignUrl: RoyalRoadApi.rrUrl(href),
             title,
             datePublished,
             content: contentHtml,
@@ -237,9 +241,11 @@ class RoyalRoadParser {
         const chapters: RoyalRoadChapterStub[] = [];
 
         $(".chapter-row").each((i, el) => {
+            const href = $(el).find("a").first().attr("href")!;
             chapters.push({
                 title: $(el).find("td").eq(0).find("a").text().trim(),
-                rrSlug: $(el).find("a").first().attr("href")!,
+                rrSlug: RoyalRoadApi.rrSlug(href),
+                foreignUrl: RoyalRoadApi.rrUrl(href),
                 datePublished: new Date(
                     $(el).find("td").eq(1).find("time").attr("datetime")!,
                 ),

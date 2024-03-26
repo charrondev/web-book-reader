@@ -2,15 +2,15 @@ use log::LevelFilter;
 use migrations::migrations;
 use tauri_plugin_sql::{Migration, MigrationKind};
 use std::fs;
-use tauri::{plugin::Plugin, Manager};
+use tauri::Manager;
 use tauri_plugin_log::{fern::colors::ColoredLevelConfig, Target, TargetKind};
 use sqlx::{
     sqlite::Sqlite,
     error::BoxDynError,
     migrate::{
-        MigrateDatabase, Migration as SqlxMigration, MigrationSource, MigrationType, Migrator,
+        MigrateDatabase, Migration as SqlxMigration, MigrationSource, Migrator,
     },
-    Column, Pool, Row,
+     Pool,
 };
 use futures_core::future::BoxFuture;
 
@@ -56,8 +56,8 @@ async fn reset_db(app_handle: tauri::AppHandle) -> tauri::Result<String> {
         .path()
         .app_config_dir()?;
 
-    fs::remove_dir_all(&db_root)?;
-    fs::create_dir(&db_root)?;
+    let _ = fs::remove_dir_all(&db_root);
+    let _ = fs::create_dir(&db_root);
 
     let db_path = db_root.clone().join("application.db");
     let db_path = db_path.to_str().unwrap();

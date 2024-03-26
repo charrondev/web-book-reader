@@ -13,8 +13,8 @@ export class DbUtils {
         );
     }
 
-    static currentDate(): string {
-        return new Date().toISOString();
+    static currentDate(): Date {
+        return new Date();
     }
 
     static query() {

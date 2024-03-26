@@ -13,6 +13,7 @@ import { Theme } from "@radix-ui/themes";
 import { SearchContextProvider } from "./search/Search.Context";
 import { applyHistoryKludge } from "./History";
 import { ErrorView } from "./ui/ErrorHandler";
+import { DownloadContextProvider } from "./downloader/Downloader.context";
 
 applyHistoryKludge();
 attachConsole();
@@ -39,8 +40,9 @@ const queryClient = new QueryClient({
         queries: {
             retry: false,
             refetchInterval: false,
-            refetchOnWindowFocus: false,
-            refetchOnMount: false,
+            refetchOnWindowFocus: true,
+            refetchOnMount: true,
+            throwOnError: true,
         },
         mutations: {
             retry: false,
@@ -63,7 +65,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <SearchContextProvider router={router}>
                 <DatabaseContext.Provider value={db}>
                     <QueryClientProvider client={queryClient}>
-                        <RouterProvider router={router} />
+                        <DownloadContextProvider>
+                            <RouterProvider router={router} />
+                        </DownloadContextProvider>
                     </QueryClientProvider>
                 </DatabaseContext.Provider>
             </SearchContextProvider>

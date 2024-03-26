@@ -106,6 +106,8 @@ body {
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, avenir next,
         avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto,
         noto, arial, sans-serif;
+    --font-family-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+
 
     font-family: var(--font-family-sans-serif);
     font-size: 16px;

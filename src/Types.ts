@@ -10,11 +10,13 @@ export interface BookCover {
 export type Html = string;
 
 export interface ChapterStub {
+    foreignUrl: string;
     title: string;
     datePublished: Date;
 }
 
 export interface Chapter extends ChapterStub {
+    foreignUrl: string;
     title: string;
     datePublished: Date;
     content: string;

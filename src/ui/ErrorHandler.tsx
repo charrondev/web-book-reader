@@ -1,8 +1,19 @@
-import React, { useEffect } from "react";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { TitleBar } from "./TitleBar";
-import { ContentContainer } from "./ContentContainer";
+import styled from "@emotion/styled";
+import React from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { format as formatSql } from "sql-formatter";
 import { DbError } from "../Errors";
+import { ContentContainer } from "./ContentContainer";
+import { TitleBar } from "./TitleBar";
+
+const CodeBlock = styled(SyntaxHighlighter)({
+    fontFamily: "var(--font-family-mono)",
+    marginBlock: 12,
+    borderRadius: 4,
+    padding: "8px 12px !important",
+});
 
 export function ErrorView(props: { error: any }) {
     const { error } = props;
@@ -12,11 +23,19 @@ export function ErrorView(props: { error: any }) {
             <TitleBar title={title} />
             <ContentContainer>
                 {error instanceof DbError && <p>{error.description}</p>}
-                {error instanceof DbError && <pre>{error.query}</pre>}
                 {error instanceof DbError && (
-                    <pre>{JSON.stringify(error.params)}</pre>
+                    <CodeBlock style={atomOneDark}>
+                        {formatSql(error.query, {})}
+                    </CodeBlock>
                 )}
-                {error instanceof Error && <pre>{error.stack}</pre>}
+                {error instanceof DbError && (
+                    <CodeBlock style={atomOneDark}>
+                        {JSON.stringify(error.params)}
+                    </CodeBlock>
+                )}
+                {error instanceof Error && error.stack && (
+                    <CodeBlock style={atomOneDark}>{error.stack}</CodeBlock>
+                )}
             </ContentContainer>
         </div>
     );
