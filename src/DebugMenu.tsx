@@ -29,7 +29,7 @@ export function DebugMenu() {
     });
 
     return (
-        <div css={{}}>
+        <div css={{ position: "fixed" }}>
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger
                     css={{

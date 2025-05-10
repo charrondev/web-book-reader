@@ -4,7 +4,7 @@
  */
 
 import { Offscreen } from "../ui/Offscreen";
-import type { PageDimensions, PageGroup } from "./PageSplitter.types";
+import type { Page, PageDimensions, PageGroup } from "./PageSplitter.types";
 
 /**
  * Class to split a single HTML element into multiple pages based on a target height and width.
@@ -33,14 +33,11 @@ export class PageSplitter {
      * @param dimensions Options for the dimensions of a target page.
      * @returns
      */
-    public static calculatePages(
-        contents: HTMLElement | null,
+    public static splitPages(
+        contents: HTMLElement,
         dimensions: PageDimensions,
-    ): PageGroup[] | null {
-        const { targetHeight, targetWidth, groupSize } = dimensions;
-        if (!contents || targetHeight <= 0 || targetWidth <= 0) {
-            return null;
-        }
+    ): Page[] {
+        const { targetHeight, targetWidth } = dimensions;
 
         // Clean out the scratch ref
         const scratchElement = document.createElement("div");
@@ -64,19 +61,7 @@ export class PageSplitter {
         const pages = splitter.calculatePages();
         document.body.removeChild(scratchElement);
 
-        const pageGroups: Array<Array<HTMLElement>> = [];
-        let currentGroup: Array<HTMLElement> = [];
-        for (const page of pages) {
-            currentGroup.push(page);
-            if (currentGroup.length === groupSize) {
-                pageGroups.push(currentGroup);
-                currentGroup = [];
-            }
-        }
-        if (currentGroup.length > 0) {
-            pageGroups.push(currentGroup);
-        }
-        return pageGroups;
+        return pages;
     }
 
     /**

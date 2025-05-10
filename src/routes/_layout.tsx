@@ -19,6 +19,7 @@ function RootLayout() {
         <div
             css={{
                 display: isMobile ? "block" : "flex",
+                flexDirection: "row-reverse",
             }}
         >
             <NavBarContextProvider
@@ -35,7 +36,6 @@ function RootLayout() {
                         zIndex: -1,
                     }}
                 ></div>
-                {!isMobile && <DesktopNavBar />}
                 <div
                     css={[
                         { flex: "1", background: "#fff" },
@@ -50,7 +50,7 @@ function RootLayout() {
                         <Outlet />
                     </ErrorHandler>
                 </div>
-                {isMobile && <MobileNavBar />}
+                {isMobile ? <MobileNavBar /> : <DesktopNavBar />}
             </NavBarContextProvider>
         </div>
     );

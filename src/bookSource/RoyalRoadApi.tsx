@@ -197,7 +197,7 @@ class RoyalRoadParser {
         const noteBefore = $(".chapter-note-before").html() ?? null;
         const noteAfter = $(".chapter-note-after").html() ?? null;
         const datePublished = new Date(
-            $(".fa-calender[title='Published'] + time").attr("datetime")!,
+            $(".fa-calendar[title='Published'] + time").attr("datetime")!,
         );
 
         const $chapterContent = $(".chapter-content");
@@ -230,7 +230,7 @@ class RoyalRoadParser {
             foreignUrl: RoyalRoadApi.rrUrl(href),
             title,
             datePublished,
-            content: contentHtml,
+            content: contentHtml.trim(),
             noteBefore,
             noteAfter,
         };

@@ -9,6 +9,7 @@ import { ContentContainer } from "./ContentContainer";
 import { DateTime } from "./DateTime";
 import { CiCalendarDate } from "react-icons/ci";
 import { useBookDownloader } from "../downloader/Downloader.context";
+import { openUrlInWindow } from "./SmartLink";
 
 interface IProps {
     books: Book[];
@@ -44,6 +45,12 @@ export function BookGrid(props: IProps) {
                         <Link
                             key={i}
                             to={book.url}
+                            onClick={(e) => {
+                                if (isDbBook(book)) {
+                                    openUrlInWindow(book.url);
+                                    e.preventDefault();
+                                }
+                            }}
                             css={{
                                 textDecoration: "none",
                                 color: "inherit",

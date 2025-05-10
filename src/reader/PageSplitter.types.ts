@@ -9,5 +9,4 @@ export type PageGroup = Array<Page>;
 export type PageDimensions = {
     targetHeight: number;
     targetWidth: number;
-    groupSize: number;
 };

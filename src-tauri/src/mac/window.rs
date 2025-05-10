@@ -311,7 +311,7 @@ pub fn setup_traffic_light_positioner<R: Runtime>(window: Window<R>) {
             }
         }
 
-        // Are we deallocing this properly ? (I miss safe Rust :(  )
+        // Am I deallocing this properly ? I miss safe Rust :(
         let window_label = window.label().to_string();
 
         let app_state = WindowState { window };

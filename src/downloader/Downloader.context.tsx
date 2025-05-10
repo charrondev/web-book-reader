@@ -3,7 +3,7 @@
  * @license AGPL-3.0-only
  */
 
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef, useState } from "react";
 import { BookSourceService } from "../bookSource/BookSource.Service";
 import { isDbBook, useDatabaseClient } from "../storage/DatabaseClient";
 import type { Book } from "../Types";
@@ -18,15 +18,18 @@ type ActiveDownloads = {
 
 interface IDownloadContext {
     checkDownloads: () => void;
+    errorMessage: string | null;
     activeDownloads: ActiveDownloads | null;
 }
 
 const DownloadContext = createContext<IDownloadContext>({
     checkDownloads: () => {},
+    errorMessage: null,
     activeDownloads: null,
 });
 
 export function DownloadContextProvider(props: { children: React.ReactNode }) {
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [activeDownloads, _setActiveDownloads] =
         React.useState<ActiveDownloads | null>(null);
     const dbClient = useDatabaseClient();
@@ -58,6 +61,8 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
             if (e === "abort") {
                 return;
             }
+            setErrorMessage(e instanceof Error ? e.message : (e as any));
+            _setActiveDownloads(null);
             throw e;
         }
     }
@@ -100,7 +105,7 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
                 const downloadedBook = await source.getBookDetails(
                     book.foreignUrl,
                 );
-                await dbClient.updateBook("bookID", downloadedBook);
+                await dbClient.updateBook(book.bookID, downloadedBook);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -152,11 +157,6 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
                 currentCheckName: `Downloading Chapters from '${book?.title ?? "Unknown Book"}'`,
             }));
             try {
-                setActiveDownloads((current) => ({
-                    ...initialState,
-                    ...current,
-                    currentCheckName: ``,
-                }));
                 const source = BookSourceService.getSourceForForeignUrl(
                     chapter.foreignUrl,
                 );
@@ -178,7 +178,7 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
                     ...initialState,
                     ...current,
                     currentCheckCompletionPercentage: Math.round(
-                        (j / Math.min(countChapters, 1)) * 100,
+                        (j / Math.max(countChapters, 1)) * 100,
                     ),
                     bookIDsDownloading: Array.from(
                         new Set(
@@ -195,6 +195,8 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
                 }));
             }
         }
+
+        setActiveDownloads(null);
     }
 
     return (
@@ -202,6 +204,7 @@ export function DownloadContextProvider(props: { children: React.ReactNode }) {
             value={{
                 checkDownloads,
                 activeDownloads,
+                errorMessage,
             }}
         >
             {props.children}

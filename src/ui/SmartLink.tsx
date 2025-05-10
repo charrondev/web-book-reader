@@ -6,6 +6,7 @@
 import { Link } from "@tanstack/react-router";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { Effect } from "@tauri-apps/api/window";
+import { hashString } from "../utils";
 
 type Props = React.ComponentProps<typeof Link> & {
     newWindow?: boolean;
@@ -31,7 +32,7 @@ export async function openUrlInWindow(
     label?: string,
 ): Promise<WebviewWindow> {
     return new Promise((resolve) => {
-        const windowLabel = label ?? cyrb53(url).toString();
+        const windowLabel = label ?? hashString(url);
 
         // Currently there's a bug preventing window events.
         // https://github.com/tauri-apps/tauri/pull/9211
@@ -67,20 +68,4 @@ export async function openUrlInWindow(
     });
 
     // newWindow.show();
-}
-
-function cyrb53(str: string, seed = 0) {
-    let h1 = 0xdeadbeef ^ seed,
-        h2 = 0x41c6ce57 ^ seed;
-    for (let i = 0, ch; i < str.length; i++) {
-        ch = str.charCodeAt(i);
-        h1 = Math.imul(h1 ^ ch, 2654435761);
-        h2 = Math.imul(h2 ^ ch, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
-    h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
-    h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 }

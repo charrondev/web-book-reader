@@ -40,8 +40,10 @@ export function Placeholder(props: {
     children: React.ReactNode;
     skeleton?: React.ReactNode;
     as?: keyof JSX.IntrinsicAttributes;
+    isLoading?: boolean;
 }) {
-    const { isLoading } = useContext(SkeletonContext);
+    let { isLoading } = useContext(SkeletonContext);
+    isLoading = props.isLoading ?? isLoading;
 
     if (isLoading && props.skeleton) {
         return <>{props.skeleton}</>;

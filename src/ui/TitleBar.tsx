@@ -5,7 +5,7 @@
 
 import { Link, useRouter } from "@tanstack/react-router";
 import { motion, useScroll } from "framer-motion";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoChevronBack } from "react-icons/io5";
 import { Colors } from "./Colors";
 import { ContentContainer } from "./ContentContainer";
@@ -22,6 +22,7 @@ type IProps = {
         label: string;
         url: string;
     };
+    actions?: React.ReactNode;
 };
 
 export function TitleBar(props: IProps) {
@@ -141,11 +142,24 @@ export function TitleBar(props: IProps) {
                     >
                         <Placeholder>{props.title}</Placeholder>
                     </motion.h1>
+                    <span css={{ flex: 1 }} />
+                    {props.actions && (
+                        <div
+                            css={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                            }}
+                        >
+                            {props.actions}
+                        </div>
+                    )}
                 </ContentContainer>
             </motion.nav>
             <div data-tauri-drag-region css={{ height: navBarHeight }}></div>
             <ContentContainer>
                 <h1
+                    tabIndex={0}
                     css={{
                         fontWeight: 900,
                         fontSize: 28,

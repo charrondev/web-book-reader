@@ -11,9 +11,10 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SettingsImport } from './routes/settings'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as IndexImport } from './routes/index'
+import { Route as BooksBookIDImport } from './routes/books.$bookID'
+import { Route as LayoutSettingsImport } from './routes/_layout.settings'
 import { Route as LayoutSearchImport } from './routes/_layout.search'
 import { Route as LayoutBooksImport } from './routes/_layout.books'
 import { Route as LayoutDiscoverIndexImport } from './routes/_layout.discover.index'
@@ -21,11 +22,6 @@ import { Route as DiscoverRoyalroadChapterSplatImport } from './routes/discover.
 import { Route as LayoutDiscoverRoyalroadSplatImport } from './routes/_layout.discover.royalroad.$'
 
 // Create/Update Routes
-
-const SettingsRoute = SettingsImport.update({
-  path: '/settings',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const LayoutRoute = LayoutImport.update({
   id: '/_layout',
@@ -35,6 +31,16 @@ const LayoutRoute = LayoutImport.update({
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const BooksBookIDRoute = BooksBookIDImport.update({
+  path: '/books/$bookID',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LayoutSettingsRoute = LayoutSettingsImport.update({
+  path: '/settings',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 const LayoutSearchRoute = LayoutSearchImport.update({
@@ -76,10 +82,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/settings': {
-      preLoaderRoute: typeof SettingsImport
-      parentRoute: typeof rootRoute
-    }
     '/_layout/books': {
       preLoaderRoute: typeof LayoutBooksImport
       parentRoute: typeof LayoutImport
@@ -87,6 +89,14 @@ declare module '@tanstack/react-router' {
     '/_layout/search': {
       preLoaderRoute: typeof LayoutSearchImport
       parentRoute: typeof LayoutImport
+    }
+    '/_layout/settings': {
+      preLoaderRoute: typeof LayoutSettingsImport
+      parentRoute: typeof LayoutImport
+    }
+    '/books/$bookID': {
+      preLoaderRoute: typeof BooksBookIDImport
+      parentRoute: typeof rootRoute
     }
     '/_layout/discover/': {
       preLoaderRoute: typeof LayoutDiscoverIndexImport
@@ -110,10 +120,11 @@ export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutBooksRoute,
     LayoutSearchRoute,
+    LayoutSettingsRoute,
     LayoutDiscoverIndexRoute,
     LayoutDiscoverRoyalroadSplatRoute,
   ]),
-  SettingsRoute,
+  BooksBookIDRoute,
   DiscoverRoyalroadChapterSplatRoute,
 ])
 

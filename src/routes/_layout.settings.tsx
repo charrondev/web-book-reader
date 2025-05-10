@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import * as shell from "@tauri-apps/plugin-shell";
 import { DbUtils } from "../utils";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_layout/settings")({
     component: () => <SettingsPage />,
 });
 

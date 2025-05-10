@@ -3,8 +3,9 @@
  * @license AGPL-3.0-only
  */
 
-import { Link } from "@tanstack/react-router";
-import React from "react";
+import { Progress } from "@radix-ui/themes";
+import { Link, useMatchRoute } from "@tanstack/react-router";
+import React, { useEffect } from "react";
 import {
     IoLibrary,
     IoLibraryOutline,
@@ -12,8 +13,9 @@ import {
     IoSettings,
     IoSettingsOutline,
 } from "react-icons/io5";
-import { Colors } from "./Colors";
+import { useBookDownloader } from "../downloader/Downloader.context";
 import { useSearchContext } from "../search/Search.Context";
+import { Colors } from "./Colors";
 
 export function DesktopNavBar(props: { className?: string }) {
     return (
@@ -36,7 +38,7 @@ export function DesktopNavBar(props: { className?: string }) {
                 <div
                     data-tauri-drag-region
                     css={{
-                        background: "rgba(255, 255, 255, 0.5)",
+                        background: "rgba(255, 255, 255, 0.7)",
                         position: "absolute",
                         top: 0,
                         right: 0,
@@ -50,9 +52,10 @@ export function DesktopNavBar(props: { className?: string }) {
                         display: "flex",
                         flexDirection: "column",
                         gap: 4,
+                        height: "100%",
                         justifyContent: "flex-start",
                         alignItems: "flex-start",
-                        padding: "56px 12px",
+                        padding: "56px 12px 16px",
                         overflowY: "scroll",
                         overscrollBehavior: "contain",
                         position: "relative",
@@ -80,6 +83,8 @@ export function DesktopNavBar(props: { className?: string }) {
                         iconActive={<IoSettings />}
                         label={"Settings"}
                     />
+                    <div css={{ flex: 1 }}></div>
+                    <DownloadNavItem />
                 </div>
             </nav>
             <div css={{ width: "200px", height: "100vh" }}></div>
@@ -87,8 +92,53 @@ export function DesktopNavBar(props: { className?: string }) {
     );
 }
 
+function DownloadNavItem() {
+    const { activeDownloads, checkDownloads, errorMessage } =
+        useBookDownloader();
+
+    useEffect(() => {
+        checkDownloads();
+    }, []);
+
+    return (
+        <div
+            css={{
+                padding: "8px 12px",
+                background: Colors.Light.slate3,
+                border: `1px solid ${Colors.Light.violet11}`,
+                width: "100%",
+                borderRadius: 9,
+            }}
+        >
+            <div css={{}}>
+                {activeDownloads && (
+                    <>
+                        <div css={{ fontSize: 12, marginBottom: 8 }}>
+                            {activeDownloads.currentCheckName}
+                        </div>
+                        <Progress
+                            value={
+                                activeDownloads?.currentCheckCompletionPercentage
+                            }
+                            max={100}
+                        />
+                    </>
+                )}
+                {errorMessage && (
+                    <span css={{ fontSize: 12, color: Colors.Light.ruby9 }}>
+                        {errorMessage}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function SearchBar() {
     const searchContext = useSearchContext();
+    const isMatch = useMatchRoute();
+    const isActive = isMatch({ to: "/search" });
+    console.log({ isActive });
     return (
         <div
             css={{
@@ -114,22 +164,28 @@ function SearchBar() {
                 onChange={(e) => {
                     searchContext.setQuery(e.target.value);
                 }}
-                css={{
-                    width: "100%",
-                    background: "rgba(0, 0, 0, 0.08)",
-                    borderRadius: 6,
-                    outline: "none",
-                    border: "2px solid transparent",
-                    fontSize: 13,
-                    padding: "3px 8px",
-                    paddingLeft: 24,
-                    "&::placeholder": {
-                        color: Colors.Light.slate10,
+                spellCheck={false}
+                css={[
+                    {
+                        width: "100%",
+                        background: "rgba(0, 0, 0, 0.08)",
+                        borderRadius: 6,
+                        outline: "none",
+                        border: "3px solid transparent",
+                        fontSize: 13,
+                        padding: "3px 8px",
+                        paddingLeft: 24,
+                        "&::placeholder": {
+                            color: Colors.Light.slate10,
+                        },
+                        "&:focus": {
+                            borderColor: Colors.Light.violet11,
+                        },
                     },
-                    "&:focus": {
+                    isActive && {
                         borderColor: Colors.Light.violet11,
                     },
-                }}
+                ]}
                 placeholder="Search"
             />
         </div>
@@ -221,8 +277,17 @@ function NavItem(props: ItemProps) {
                 isDesktop && {
                     flex: 0,
                     width: "100%",
-                    borderRadius: 6,
                     fontSize: 14,
+                    position: "relative",
+                    borderRadius: 6,
+                    background: "transparent",
+                    transition: "transform ease 0.1s",
+                    "&:active": {
+                        transform: "scale(0.992)",
+                    },
+                    "&:hover": {
+                        background: "rgba(0, 0, 0, 0.08)",
+                    },
                     "&.active": {
                         background: "rgba(0, 0, 0, 0.12)",
                     },

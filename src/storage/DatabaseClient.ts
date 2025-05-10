@@ -247,7 +247,6 @@ export class DatabaseClient {
                     authorName: update.authorName,
                     coverUrl: update.coverUrl,
                     countChapters: update.chapters?.length,
-                    url: update.url,
                     foreignUrl: update.foreignUrl,
                     dateFirstChapter: update.chapters?.sort((a, b) =>
                         spaceshipCompare(a.datePublished, b.datePublished),
@@ -261,6 +260,7 @@ export class DatabaseClient {
             await this.putBookTags(bookID, update.tags);
         }
         if (update.chapters) {
+            console.log("updating chapters", update.chapters);
             await this.insertBookChapters(bookID, update.chapters);
         }
     }
@@ -271,6 +271,7 @@ export class DatabaseClient {
             Omit<DbChapter, "dateInserted" | "dateUpdated" | "chapterID">
         >,
     ) {
+        console.log("updating chapter", { chapter });
         await this.execute((db) =>
             db.from("WBR_chapter").where("chapterID", chapterID).update({
                 content: chapter.content,
@@ -317,12 +318,15 @@ export class DatabaseClient {
             await this.fetch((db) => {
                 let query = db
                     .from("WBR_book")
+                    .select("WBR_book.*")
                     .leftJoin(
                         "WBR_bookProgress",
                         "WBR_book.bookID",
                         "WBR_bookProgress.bookID",
-                    );
-
+                    )
+                    .select("WBR_bookProgress.currentChapter")
+                    .select("WBR_bookProgress.currentPage")
+                    .select("WBR_bookProgress.currentOffset");
                 for (const [key, value] of Object.entries(where)) {
                     query.where(`WBR_book.${key}`, value);
                 }
